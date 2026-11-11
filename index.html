@@ -1,0 +1,803 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"/>
+<meta name="color-scheme" content="light dark"/>
+<link rel="icon" href="data:,"/>
+<title>Daily Address Checker — Team Tool</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@500;600&family=IBM+Plex+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#f4f5f3; --surface:#ffffff; --surface2:#eef1ee; --ink:#17201b; --muted:#5d6b62; --line:#dde2dd;
+  --red:#c8102e; --red-bg:#fdecef; --amber:#9a6200; --amber-bg:#fff3d6; --green:#14713c; --green-bg:#e6f4ea;
+  --blue:#175cd3; --blue-bg:#eaf1fe; --dark:#12211a;
+  --shadow:0 10px 30px rgba(18,33,26,.08);
+}
+@media (prefers-color-scheme: dark){
+  :root{ --bg:#111613; --surface:#1a211c; --surface2:#232c26; --ink:#edf2ee; --muted:#a7b5aa; --line:#303a33;
+  --red-bg:#3a1820; --amber-bg:#3a2c10; --green-bg:#143322; --blue-bg:#16294d; --shadow:0 10px 30px rgba(0,0,0,.35);}
+}
+*{box-sizing:border-box}
+body{margin:0;font-family:"IBM Plex Sans",system-ui,sans-serif;background:var(--bg);color:var(--ink);line-height:1.5}
+a{color:var(--blue)}
+button,input,select,textarea{font:inherit}
+.wrap{max-width:1180px;margin:0 auto;padding:20px 16px 56px}
+.topbar{display:flex;justify-content:space-between;gap:16px;align-items:flex-start;flex-wrap:wrap;margin-bottom:16px}
+.eyebrow{font-family:"IBM Plex Mono",monospace;font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--red);font-weight:600}
+h1{font-size:clamp(28px,5vw,44px);line-height:.95;margin:6px 0 8px;letter-spacing:-.03em}
+.lead{color:var(--muted);max-width:700px;margin:0}
+.datepill{background:var(--dark);color:#fff;padding:10px 14px;border-radius:10px;font-size:13px;text-align:right}
+.datepill b{display:block;font-size:15px}
+@media(prefers-color-scheme:dark){.datepill{background:#e8ede9;color:#12211a}}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin:18px 0}
+.stat{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:14px}
+.stat span{font-size:12px;color:var(--muted);display:block}
+.stat b{font-size:28px;line-height:1}
+.stat small{display:block;color:var(--muted);margin-top:4px;font-size:12px}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:18px;box-shadow:var(--shadow);margin-bottom:14px}
+.panel h2{margin:0 0 6px;font-size:19px}
+.panel p.desc{color:var(--muted);margin:0 0 14px;font-size:14px}
+.steps{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:14px}
+.step{border:1px solid var(--line);border-radius:12px;padding:13px;background:var(--surface)}
+.step i{font-style:normal;width:28px;height:28px;border-radius:50%;background:var(--red);color:#fff;display:grid;place-items:center;font-weight:700;font-size:14px;margin-bottom:8px}
+.step b{display:block;font-size:14px}.step p{margin:3px 0 0;color:var(--muted);font-size:13px}
+.drop{border:2px dashed #9db0a2;border-radius:14px;padding:22px;text-align:center;background:var(--surface2);cursor:pointer}
+.drop.over{border-color:var(--red);background:var(--red-bg)}
+.drop b{font-size:16px}.drop p{color:var(--muted);margin:4px 0 12px;font-size:13px}
+.btn{border:0;border-radius:9px;padding:10px 14px;font-weight:700;cursor:pointer;background:var(--dark);color:#fff;font-size:14px}
+.btn.red{background:var(--red)} .btn.light{background:var(--surface);color:var(--ink);border:1px solid var(--line)} .btn.ghost{background:transparent;color:var(--ink);border:1px solid var(--line)}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+a.btn{text-decoration:none;display:inline-flex;align-items:center;justify-content:center;text-align:center;cursor:pointer}
+a.btn.dl-off{opacity:.45}
+.dlhelp{font-size:13px;background:var(--blue-bg);border-radius:10px;padding:11px 13px;margin-top:12px;color:var(--ink)}
+.csvpanel{margin-top:12px;border:1px solid var(--line);border-radius:12px;padding:14px;background:var(--surface2)}
+.csvpanel h3{margin:0 0 6px;font-size:15px}
+.csvpanel p{margin:0 0 10px;color:var(--muted);font-size:13px}
+.csvpanel textarea{width:100%;min-height:180px;padding:10px;border:1px solid var(--line);border-radius:9px;background:var(--surface);color:var(--ink);font-family:"IBM Plex Mono",monospace;font-size:12px;resize:vertical}
+.rowflex{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.pickrow{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-top:10px}
+.filelist{margin-top:12px;display:flex;gap:8px;flex-wrap:wrap}
+.chip{background:var(--surface);border:1px solid var(--line);padding:6px 10px;border-radius:999px;font-size:13px}
+.meter{height:10px;background:var(--surface2);border-radius:999px;overflow:hidden;margin-top:8px}
+.meter i{display:block;height:100%;background:var(--red);width:0%}
+.controls{display:flex;gap:8px;flex-wrap:wrap}
+.controls input,.controls select{padding:10px 11px;border:1px solid var(--line);border-radius:9px;background:var(--surface);color:var(--ink)}
+.controls input{flex:1;min-width:180px}
+.ordercard{border:1px solid var(--line);border-radius:14px;padding:14px;margin-bottom:10px;background:var(--surface)}
+.orderhead{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;align-items:flex-start}
+.ordno{font-family:"IBM Plex Mono",monospace;font-weight:600}
+.cust{font-weight:700}.addr{color:var(--muted);font-size:14px;white-space:pre-line}
+.ordval{font-weight:700;font-size:14px}
+.badge{display:inline-flex;padding:4px 8px;border-radius:999px;font-size:12px;font-weight:800;letter-spacing:.02em}
+.b-ok{background:var(--green-bg);color:var(--green)} .b-fix{background:var(--blue-bg);color:var(--blue)} .b-confirm{background:var(--amber-bg);color:var(--amber)} .b-hold{background:var(--red-bg);color:var(--red)} .b-pending{background:#3f2a56;color:#e9ddff} @media(prefers-color-scheme:light){.b-pending{background:#efe7ff;color:#5b21b6}}
+.b-queue{background:var(--surface2);color:var(--ink);border:1px solid var(--line)}
+.b-preview{background:var(--blue-bg);color:var(--blue)}
+.b-value{background:var(--dark);color:#fff} @media(prefers-color-scheme:dark){.b-value{background:#e8ede9;color:#12211a}}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:10px}
+.box{background:var(--surface2);border-radius:10px;padding:11px;font-size:14px}
+.box span{font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);display:block;font-weight:700;margin-bottom:4px}
+.issue{font-weight:600}
+textarea.verify{width:100%;min-height:64px;padding:10px;border:1px solid var(--line);border-radius:9px;background:var(--surface);color:var(--ink);resize:vertical}
+details{margin-top:10px} summary{cursor:pointer;font-weight:700;font-size:14px}
+.empty{text-align:center;padding:34px 16px;color:var(--muted)}
+.legend{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}
+.note{font-size:13px;background:var(--amber-bg);border-radius:10px;padding:11px 13px;margin-top:12px;color:var(--ink)}
+.note b{color:var(--amber)}
+.morewrap{text-align:center;margin-top:6px}
+.morewrap p{color:var(--muted);font-size:13px;margin:0 0 8px}
+.footer{color:var(--muted);font-size:13px;text-align:center;margin-top:18px}
+@media(max-width:820px){.steps,.grid2{grid-template-columns:1fr}.datepill{text-align:left}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="topbar">
+    <div>
+      <div class="eyebrow">Dispatch Team · Free Method — No Paid API</div>
+      <h1>Daily Address Checker</h1>
+      <p class="lead">Upload today's order export files one by one. <b>Every</b> order's shipping address is checked, whatever its value — there is no £30 condition and no value priority anywhere. The billing address is ignored completely. Each shipping address must match <b>exactly</b> on all three parts — <b>postcode, street, and town / county (state)</b> — first against the free postcodes.io data, then against the <b>Royal Mail preview</b>: paste the address on Royal Mail, compare the preview result line by line, and only an exact match counts as verified. Any wrong or mismatched part flags the order — it is never passed as OK. Every cleaned address is built with <b>all</b> of its parts, in Royal Mail order: house / street, <b>locality</b>, <b>village (if any)</b>, <b>town</b>, <b>post town</b>, then the postcode — no part is dropped, and no part is repeated.</p>
+    </div>
+    <div class="datepill"><span>Today</span><b id="todayLabel">—</b><span>No order limit — 1,000+ orders a day supported</span><span style="display:block">Every order gets a Royal Mail preview check — no value condition</span></div>
+  </div>
+
+  <div class="stats">
+    <div class="stat"><span>Total loaded</span><b id="sTotal">0</b><small>Across all files today</small></div>
+    <div class="stat"><span>Verified OK</span><b id="sOk">0</b><small>Exact Royal Mail match — dispatch</small></div>
+    <div class="stat"><span>Needs action</span><b id="sFlag">0</b><small>FIX / CONFIRM / HOLD</small></div>
+    <div class="stat"><span>Awaiting preview check</span><b id="sHigh">0</b><small>Passed the rule checks — still needs the Royal Mail preview match</small></div>
+    <div class="stat"><span>Preview queue</span><b id="sQueue">0</b><small>Every unverified order, worst first</small></div>
+    <div class="stat"><span>HOLD</span><b id="sPending">0</b><small>Do not dispatch</small></div>
+  </div>
+
+  <div class="steps">
+    <div class="step"><i>1</i><b>Upload files one by one</b><p>Add each export file in turn. You do not need to enter a website or brand name — it is detected automatically from the file name.</p></div>
+    <div class="step"><i>2</i><b>The check runs automatically</b><p>Each postcode is checked live via the free <b>postcodes.io</b> service: the postcode must exist, and the town and county (state) in the file must match the postcode's area — any mismatch is flagged, never passed. House number, street, locality, village, town and post town rules are then applied to the shipping address of every order, whatever its value. The billing address is ignored — it is never checked or matched.</p></div>
+    <div class="step"><i>3</i><b>Verify every order on the Royal Mail preview</b><p>Every order goes into the preview queue, worst first: HOLD, then FIX, then CONFIRM, then the rest — order value plays no part. On Royal Mail, paste the address and read the <b>preview</b> result: the postcode, street and town in the preview must match the shipping address exactly. Paste the preview address into the order card and press <b>Mark Royal Mail Verified</b> — the checker re-checks the pasted address against the order's postcode, street and town and rejects it if anything does not match.</p></div>
+  </div>
+
+  <section class="panel">
+    <h2>1 — Today's export files</h2>
+    <p class="desc">Shopify CSV exports (orders_export) work as they are — the checker reads the order number, the shipping address, and the order total. Billing address columns are ignored completely: the billing address is never verified or matched against the shipping address. Other CSVs also work if they have Order, Address, City, Postcode and Total columns — a Province / County (state) column is read too, and matched against the postcode's county — and if a file has separate <b>Locality</b>, <b>Village</b>, <b>Town</b> or <b>Post Town</b> columns, those are read too and kept as parts of the address (Address line 2 is also kept as the locality line). Files are checked in the order you add them, and nothing is uploaded anywhere — everything runs in this browser.</p>
+    <div class="drop" id="dropZone" tabindex="0" role="button" aria-label="Upload CSV files">
+      <b>Drop CSV files here, or click to select them</b>
+      <p>Add files one by one or several at once · No daily order limit · The brand name is set automatically from each file name</p>
+      <div class="pickrow" onclick="event.stopPropagation()">
+        <button class="btn red" id="pickBtn" type="button">Select CSV Files</button>
+        <button class="btn light" id="demoBtn" type="button">Try the demo orders</button>
+      </div>
+      <input type="file" id="fileInput" accept=".csv,text/csv" multiple hidden/>
+    </div>
+    <div class="filelist" id="fileList"></div>
+    <div style="margin-top:14px">
+      <div class="rowflex" style="justify-content:space-between"><span style="font-size:13px;color:var(--muted)">Royal Mail preview queue — every unverified order, from all of today's files</span><b style="font-size:13px" id="slotLabel">0 orders waiting</b></div>
+      <div class="meter"><i id="slotMeter"></i></div>
+      <div class="note"><b>How the preview queue works:</b> the queue covers <b>every</b> order that is not yet verified — there is no £30 condition, no value priority, and no daily cap, because the check uses the Royal Mail <b>preview</b>: paste the address, read the address Royal Mail shows in the preview, and compare. Orders are ranked by severity only: <b>P1 HOLD</b> first, then <b>P2 FIX</b>, then <b>P3 CONFIRM</b>, then formatting-only and rule-passed orders; within the same severity, higher order value comes first as a tie-break only. An order leaves the queue only when its preview address is pasted in and marked verified — and the checker rejects a pasted address whose postcode, street or town does not match the order. An unverified order is never a final OK.</div>
+    </div>
+  </section>
+
+  <section class="panel" id="resultsPanel">
+    <h2>2 — Checked orders</h2>
+    <p class="desc">Orders are shown in queue order: worst problems first (work from #1 down), then the orders that passed the rule checks and are waiting for their preview match. <b>P1 HOLD</b> means do not dispatch, <b>P2 FIX</b> means correct it first, <b>P3 CONFIRM</b> means a part of the shipping address does not match and must be resolved. P4 is formatting only. <b>No order is OK until it is verified:</b> an order counts as verified only when the Royal Mail preview address has been pasted in, marked verified, and its <b>postcode, street and town all match</b> the shipping address exactly — the checker rejects a pasted address that does not match. Orders that pass the automatic checks show <b>PREVIEW CHECK</b> until then.<br/><b>A cleaned address is not a verified address.</b> For HOLD orders the verified field no longer copies the exported address — it stays marked <b>NOT ROYAL MAIL VERIFIED</b> until the exact Royal Mail address is pasted in and marked verified. For other flagged orders the cleaned address is a <b>suggestion only</b>, including a missing post town where one is detected — for example a file that shows only a village name, where Royal Mail's address also lists the post town before the postcode — and it must still be confirmed on Royal Mail.<br/><b>Address parts:</b> every order card now breaks the address into its parts — <b>Locality · Village (if any) · Town · Post town</b> — and the cleaned address always contains all of them, in that order, before the postcode: the locality and village from the file (Address line 2 or its own Locality / Village column, or the parish for that postcode where it names a village that is missing from the file), the town from the file's City / Town, and the post town from the file or, where the file misses it, the detected post town. A part that is already inside another line is not repeated, and an order with no town and no post town at all is flagged CONFIRM.</p>
+    <div class="controls">
+      <input id="searchBox" placeholder="Search order no, name, postcode, street…"/>
+      <select id="statusFilter"><option value="">All statuses</option><option value="OK">OK — Verified</option><option>FIX</option><option>CONFIRM</option><option>HOLD</option><option>PREVIEW CHECK</option></select>
+      <select id="siteFilter"><option value="">All files / brands</option></select>
+      <select id="queueFilter"><option value="">All orders</option><option value="queue">Preview queue only</option><option value="verified">Verified only</option></select>
+      <a class="btn dl-off" id="exportBtn" download="address-checked.csv">⬇ Download Checked Sheet (.csv file)</a>
+      <a class="btn light dl-off" id="queueExportBtn" download="royal-mail-queue.csv">⬇ Download Preview Queue (.csv file)</a>
+      <button class="btn ghost" id="clearBtn" type="button">Clear all</button>
+    </div>
+    <div class="dlhelp" id="dlHelp"><b>Getting your file:</b> <span id="dlHelpText">Load orders first — the download buttons work as soon as orders are checked.</span> <span id="dlAlt" style="display:none">If the file does not appear in your downloads — common inside WhatsApp, Facebook and other in-app browsers, which can block downloads from embedded pages — open <button class="btn light" id="viewCsvBtn" type="button" style="padding:6px 10px;font-size:13px">View / Save Checked Sheet</button> <button class="btn light" id="viewQueueBtn" type="button" style="padding:6px 10px;font-size:13px">View / Save Preview Queue</button> instead: from there, “Open CSV in a new tab” shows the file in a full browser tab with its own download button, and “Share file” (on phones that support it) saves the same .csv through the share sheet. Copying the text is only a last resort.</span><span id="dlStatus" style="display:block;font-weight:700;margin-top:4px"></span></div>
+    <div class="csvpanel" id="csvPanel" style="display:none">
+      <h3 id="csvPanelTitle">Checked Sheet (.csv file)</h3>
+      <p><b>Save as .csv file</b> downloads the real file to your device. If your browser blocks that — common in in-app browsers — use <b>Open CSV in a new tab</b>: the file opens in a full browser tab with its own download button at the top. On a phone, <b>Share file…</b> (shown when your browser supports it) saves the same .csv through the share sheet, e.g. to Files or Drive. The text box at the bottom is the same CSV, kept only as a copy-and-paste last resort.</p>
+      <div class="rowflex" style="margin-bottom:10px">
+        <a class="btn red dl-off" id="saveCsvLink" download="address-checked.csv">⬇ Save as .csv file</a>
+        <button class="btn" id="openTabBtn" type="button">Open CSV in a new tab ↗</button>
+        <button class="btn light" id="shareCsvBtn" type="button" style="display:none">Share file…</button>
+        <button class="btn light" id="copyCsvBtn" type="button">Copy all CSV text</button>
+        <button class="btn ghost" id="closeCsvBtn" type="button">Close</button>
+        <span id="copyStatus" style="font-size:13px;color:var(--muted)"></span>
+      </div>
+      <textarea id="csvText" readonly></textarea>
+    </div>
+    <div class="note" id="dlFallback" style="display:none"></div>
+    <div class="legend">
+      <span class="badge b-ok">OK — Royal Mail verified, exact match</span><span class="badge b-fix">FIX — correct it first</span><span class="badge b-confirm">CONFIRM — a part does not match, resolve it</span><span class="badge b-hold">HOLD — do not dispatch</span><span class="badge b-preview">PREVIEW CHECK — passed the rules, Royal Mail preview match still needed</span>
+    </div>
+    <div id="results" style="margin-top:14px"><div class="empty"><b>No orders loaded yet.</b><br/>Upload today's first export file above — or try the demo orders first to see how the queue works.</div></div>
+    <div class="morewrap" id="moreWrap" style="display:none"><p id="moreLabel"></p><button class="btn light" id="moreBtn" type="button">Show more orders</button></div>
+  </section>
+
+  <section class="panel">
+    <h2>The team's daily routine</h2>
+    <div class="grid2">
+      <div class="box"><span>Royal Mail preview check — a couple of minutes per order</span>On a queued order, copy the postcode → open <a href="https://www.royalmail.com/find-a-postcode" target="_blank" rel="noopener">royalmail.com/find-a-postcode</a> → paste the address and read the <b>preview</b> result → check the preview's postcode, street and town against the shipping address, part by part → paste the preview address into the order card here and press <b>Mark Royal Mail Verified</b>. If any part differs, fix the order first — do not mark it verified. Every order needs this, whatever its value.</div>
+      <div class="box"><span>HOLD orders</span>HOLD means the house number or postcode itself is missing or wrong — for example an order with only a street name and no number. <b>Do not dispatch these.</b> Get the house or business name and number from the customer first.</div>
+      <div class="box"><span>CONFIRM orders</span>CONFIRM means something in the <b>shipping</b> address needs a second look — for example the town does not match the postcode, or there is a house name but no number. Verify the shipping address on Royal Mail before dispatch. The billing address is ignored completely and is never checked.</div>
+      <div class="box"><span>End of day</span>Download the Checked Sheet CSV and keep it — it records every order's status, issue, order value, queue position and verified address. Any order still in the preview queue at the end of the day is <b>not</b> verified — it carries over as the team's list for the next day, not as a checked order.</div>
+    </div>
+    <p class="desc" style="margin-top:12px">What this checker cannot do on its own: postcodes.io confirms that a postcode exists — it does not confirm the individual house, and it has no official post-town field. Where its constituency and travel-to-work area agree on a town that is missing from the file (for example, the file shows only a village while both agree on the nearby post town), the checker flags a <b>missing post town</b>, puts that town into the <b>suggested</b> cleaned address as the post town part, and queues the order as a FIX — but only Royal Mail's own address list confirms it. The same honesty applies to the other parts: the locality and village come from the file itself (Address line 2, or a Locality / Village column), with the postcode's parish used only as a <b>suggested</b> village where the file has none, and the town from the file's City / Town — all four parts (locality, village if any, town, post town) are carried into the cleaned address and the downloaded sheet, but none of them makes an address Royal Mail verified on its own. Fine spelling differences (Alexandra vs Alexander, Yew Tree vs Yewtree, Upper Brow vs Upperbrow) also only show up on Royal Mail, which is why flagged orders must not skip the Royal Mail step, and why a HOLD order's verified field is never filled with a copy of the exported address.</p>
+  </section>
+
+  <p class="footer">Daily Address Checker · Free postcode check (postcodes.io) + Royal Mail preview check for every order + manual verification · No order limit · No value condition — the queue is severity order only</p>
+</div>
+
+<script>
+var orders=[]; var fileNames=[];
+var PAGE_SIZE=120; var renderLimit=PAGE_SIZE;
+var pcCache={}; var processing=false;
+var dlDirty=true; var csvPanelType='checked';
+function markDlDirty(){ dlDirty=true; }
+
+function $(id){return document.getElementById(id)}
+function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})}
+function norm(s){return String(s||'').trim().replace(/\s+/g,' ')}
+function titleCase(s){return norm(s).toLowerCase().replace(/\b\w/g,function(c){return c.toUpperCase()})}
+function parseMoney(s){ if(s==null||s==='')return null; var n=parseFloat(String(s).replace(/[^0-9.\-]/g,'')); return isNaN(n)?null:n; }
+function fmtMoney(n){ return n==null?'—':'£'+n.toFixed(2); }
+/* Address parts — locality, village, town and post town are parts of the
+   address in their own right, alongside the existing checks. A part is
+   added once only: if it is already inside an earlier line (for example
+   the village already inside Address line 1) it is not repeated. */
+function addAddrPart(parts,raw){
+  var p=titleCase(norm(raw)); if(!p)return;
+  var low=p.toLowerCase();
+  for(var i=0;i<parts.length;i++){ var el=parts[i].toLowerCase(); if(el===low||el.indexOf(low)>-1)return; }
+  parts.push(p);
+}
+function exportedAddr(o){
+  var parts=[]; addAddrPart(parts,o.ship1); addAddrPart(parts,o.ship2);
+  addAddrPart(parts,o.shipLocality); addAddrPart(parts,o.shipVillage);
+  addAddrPart(parts,o.shipTown); addAddrPart(parts,o.shipCity); addAddrPart(parts,o.shipPostTownCol);
+  if(o.postcode)parts.push(o.postcode);
+  return parts.join(', ');
+}
+
+/* Brand / file name is detected automatically from the file name — no manual entry */
+function detectBrand(filename,seq){
+  var base=String(filename||'').replace(/\.[a-z0-9]+$/i,'');
+  var words=base.replace(/[_.\-]+/g,' ').split(/\s+/).filter(Boolean);
+  var stop={orders:1,order:1,export:1,exported:1,shopify:1,daily:1,csv:1,file:1,files:1,data:1,report:1,download:1,sales:1};
+  var kept=words.filter(function(w){
+    var lw=w.toLowerCase();
+    if(stop[lw])return false;
+    if(/^\d+$/.test(w))return false;
+    if(/^\(?\d+\)?$/.test(w))return false;
+    if(/^\d{4}\d{2}(\d{2})?$/.test(w))return false;
+    if(/^\d{1,2}(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)/i.test(w))return false;
+    return true;
+  });
+  if(kept.length) return titleCase(kept.join(' '));
+  return 'Upload '+(seq+1);
+}
+
+/* ---------- CSV parser (handles quoted Shopify fields) ---------- */
+function parseCSV(text){
+  var rows=[],row=[],cur='',inQ=false,i,c;
+  text=text.replace(/^\uFEFF/,'');
+  for(i=0;i<text.length;i++){c=text[i];
+    if(inQ){ if(c==='"'){ if(text[i+1]==='"'){cur+='"';i++;} else inQ=false; } else cur+=c; }
+    else{ if(c==='"') inQ=true; else if(c===','){row.push(cur);cur='';} else if(c==='\n'){row.push(cur);rows.push(row);row=[];cur='';} else if(c==='\r'){} else cur+=c; }
+  }
+  if(cur!==''||row.length){row.push(cur);rows.push(row)}
+  return rows.filter(function(r){return r.length>1||norm(r[0])!==''});
+}
+function pick(headers,names){
+  for(var n=0;n<names.length;n++){var idx=headers.indexOf(names[n].toLowerCase()); if(idx>-1) return idx;}
+  for(var h=0;h<headers.length;h++){for(var n2=0;n2<names.length;n2++){if(headers[h].indexOf(names[n2])>-1) return h;}}
+  return -1;
+}
+function val(row,idx){return idx>-1?norm(row[idx]):''}
+
+/* ---------- Address rules ---------- */
+var UKPC=/^[A-Z]{1,2}\d[A-Z\d]?\s*\d[A-Z]{2}$/i;
+function extractPC(s){var m=String(s||'').toUpperCase().match(/[A-Z]{1,2}\d[A-Z\d]?\s*\d[A-Z]{2}/);return m?norm(m[0]):''}
+function cleanPC(s){return extractPC(s)||norm(s).toUpperCase()}
+var JOINED=['upperbrow','yewtree','camock','cammock'];
+function analyse(o){
+  var issues=[],priority=0,status='OK',source='postcodes.io + rules';
+  var a1=o.ship1, a2=o.ship2, city=o.shipCity, pc=cleanPC(o.shipZip);
+  o.postcode=pc;
+  var full=(a1+' '+a2).trim();
+  if(!full){issues.push('The shipping address is missing entirely');priority=1;}
+  if(!pc){issues.push('Postcode is missing');priority=1;}
+  else if(!UKPC.test(pc)){issues.push('Postcode format looks invalid: “'+pc+'”');priority=1;}
+  if(full){
+    var hasDigit=/\d/.test(full);
+    var words=full.replace(/,/g,'').split(/\s+/).filter(Boolean);
+    /* A named house in front of a named street — “Rose Cottage, Mill Lane” — is a
+       house-name address (CONFIRM / verify), not a missing house number (HOLD). HOLD is
+       for a street on its own, with nothing in front of it. */
+    var addrParts=full.split(',').map(function(p){return norm(p)}).filter(Boolean);
+    var namedHouseStreet=addrParts.length>=2 && /\b(street|road|lane|avenue|drive|close|way|place|crescent|terrace|gardens|hill|square|walk|row)\b/i.test(addrParts.slice(1).join(' '));
+    if(/^\d+$/.test(full)){issues.push('Only a house number “'+full+'” — the street name is missing'); if(priority===0||priority>2)priority=2;}
+    else if(!hasDigit && words.length<=4 && !/(cottage|lodge|house|farm|hall|court|manor|villa|bungalow)/i.test(full) && !namedHouseStreet){issues.push('House number appears to be missing — only a street or name is present'); priority=1;}
+    else if(!hasDigit){issues.push('No house number, only a building or house name — confirm it on Royal Mail'); if(!priority)priority=3;}
+  }
+  if(o.pcValid===false){issues.push('This postcode does not exist according to postcodes.io');priority=1;}
+  if(o.pcValid===true && o.pcTown){
+    if(city && city.toLowerCase()!==o.pcTown.toLowerCase() && (o.pcAlt||'').indexOf(city.toLowerCase())===-1){
+      issues.push('Town mismatch: the file shows “'+city+'”, the postcode area is “'+o.pcTown+'”'); if(!priority)priority=3;
+    }
+  }
+  /* County / state (the file's Province / County column) must match the
+     postcode's county too — a shipping address whose county belongs to a
+     different postcode area is a mismatch, never an OK. */
+  if(o.pcValid===true && norm(o.shipProvince)){
+    var provLow=norm(o.shipProvince).toLowerCase();
+    var countyLow=(o.pcCounty||'').toLowerCase();
+    if(provLow!==countyLow && (o.pcAlt||'').indexOf(provLow)===-1){
+      issues.push('County / state mismatch: the file shows “'+norm(o.shipProvince)+'”, the postcode is in “'+(o.pcCounty||o.pcTown||'another county')+'”'); if(!priority)priority=3;
+    }
+  }
+  /* Missing post town — the file city can be a village / parish while Royal Mail's
+     address also lists a separate post town before the postcode, so the verified
+     address is not a copy of the export. postcodes.io has no official post-town
+     field, so the candidate below is only used when its parliamentary constituency
+     and travel-to-work area agree on the same town — it is a suggested correction
+     to confirm on Royal Mail, never presented as Royal Mail verified. */
+  if(o.pcValid===true && o.pcPostTown){
+    var candPT=norm(o.pcPostTown);
+    var allAddrText=(full+' '+city).toLowerCase();
+    if(candPT && allAddrText.indexOf(candPT.toLowerCase())===-1){
+      issues.push('Missing post town: the file shows “'+(city||o.pcParish||'the locality')+'” only — Royal Mail adds the post town “'+titleCase(candPT)+'” for this postcode. Add “'+titleCase(candPT)+'” before the postcode and confirm the exact address on Royal Mail');
+      if(priority===0||priority>2)priority=2;
+    }
+  }
+  /* Village (if any) is part of the address too. The file's own Village column
+     wins; otherwise postcodes.io's parish for the postcode names the village /
+     civil parish — where that village is missing from the file and is not the
+     town or post town, it is added to the suggested cleaned address as the
+     village part and flagged to confirm on Royal Mail (suggestion only, never
+     presented as Royal Mail verified). */
+  var villageCand='';
+  if(o.pcValid===true && !norm(o.shipVillage) && o.pcParish){
+    var parLow=norm(o.pcParish).toLowerCase();
+    var townLow=(norm(o.shipTown)||norm(city)).toLowerCase();
+    var ptLow=(norm(o.shipPostTownCol)||norm(o.pcPostTown||'')).toLowerCase();
+    if(parLow && parLow!==townLow && parLow!==ptLow && parLow!==(o.pcTown||'').toLowerCase() && (full+' '+city).toLowerCase().indexOf(parLow)===-1){
+      villageCand=titleCase(o.pcParish);
+      issues.push('Village missing from the file: the parish for this postcode is “'+villageCand+'” — it is added to the suggested cleaned address as the village part. Confirm the exact address on Royal Mail');
+      if(!priority)priority=3;
+    }
+  }
+  /* Town and post town are parts of the address: an order with neither a town
+     (City / Town in the file) nor any post town cannot be dispatched as-is. */
+  if(!norm(city) && !norm(o.shipTown) && !norm(o.shipPostTownCol) && !(o.pcValid===true && o.pcPostTown)){
+    issues.push('Town / post town is missing: the file has no town and no post town for this address — add the town and the post town before the postcode and confirm on Royal Mail');
+    if(!priority)priority=3;
+  }
+  /* Billing address is ignored completely — only the shipping address is ever checked or matched. */
+  var low=full.toLowerCase();
+  JOINED.forEach(function(w){if(low.indexOf(w)>-1){issues.push('Possible spelling issue: “'+w+'” — check the exact spelling on Royal Mail (names like Yew Tree or Upper Brow may be two words)'); if(!priority)priority=3;}});
+  if(full && full===full.toLowerCase() && /[a-z]/.test(full)){issues.push('Formatting: the address is all lower case — use Title Case'); if(!priority)priority=4;}
+  if(/\b(ave|rd|ln|dr)\b\.?/i.test(a1)){ if(!priority)priority=4; if(priority===4 && issues.indexOf('Formatting: street abbreviation (Ave / Rd) — spelling it out in full is safer')===-1)issues.push('Formatting: street abbreviation (Ave / Rd) — spelling it out in full is safer'); }
+
+  if(priority===1)status='HOLD'; else if(priority===2)status='FIX'; else if(priority===3)status='CONFIRM'; else status='OK';
+  o.priority=priority; o.status=status; o.issues=issues; o.source=source;
+  var candClean=(o.pcValid===true && o.pcPostTown)?titleCase(o.pcPostTown):'';
+  /* Structured address parts, stored for the order card and the CSV export */
+  o.addrLocality=titleCase(norm(o.shipLocality)||norm(a2));
+  o.addrVillage=titleCase(norm(o.shipVillage)||villageCand);
+  o.addrTown=titleCase(norm(o.shipTown)||norm(city));
+  o.addrPostTown=titleCase(norm(o.shipPostTownCol)||candClean);
+  /* Cleaned address — every part, in Royal Mail order, none dropped and
+     none repeated: house / street, locality, village (if any), town,
+     post town, postcode. */
+  var cleanParts=[];
+  addAddrPart(cleanParts,a1);
+  addAddrPart(cleanParts,a2);
+  addAddrPart(cleanParts,o.shipLocality);
+  addAddrPart(cleanParts,o.shipVillage);
+  addAddrPart(cleanParts,villageCand);
+  addAddrPart(cleanParts,o.shipTown);
+  addAddrPart(cleanParts,city);
+  addAddrPart(cleanParts,o.shipPostTownCol);
+  addAddrPart(cleanParts,candClean);
+  if(pc)cleanParts.push(pc);
+  o.suggestedCleaned=cleanParts.join(', ');
+  /* A HOLD order has no verified address yet, so its cleaned / verified field must NOT
+     be a copy of the exported address — that copy is exactly what made an unverified
+     address look verified. Only a pasted Royal Mail address (Mark Royal Mail Verified)
+     fills the verified field. Other flagged orders show the suggested cleaned address
+     (with the post-town correction where detected), clearly labelled as not verified. */
+  if(priority===1){
+    o.cleaned='NOT ROYAL MAIL VERIFIED — no verified address yet. Do not dispatch and do not use the exported address as if it were verified. Get the missing details from the customer, verify the exact address on Royal Mail, then paste that Royal Mail address via “Mark Royal Mail Verified”.';
+  } else {
+    o.cleaned=o.suggestedCleaned;
+  }
+  if(!o.cleaned) o.cleaned='—';
+  return o;
+}
+
+/* ---------- postcodes.io live check (free, bulk 100/call, cached across files) ---------- */
+function checkPostcodes(list){
+  var uniq=[],seen={};
+  list.forEach(function(o){var pc=o.postcode; if(pc&&UKPC.test(pc)&&!seen[pc]){seen[pc]=1; if(!pcCache[pc.toUpperCase()])uniq.push(pc);}});
+  function apply(){
+    list.forEach(function(o){var m=pcCache[(o.postcode||'').toUpperCase()]; if(m){o.pcValid=m.valid;o.pcTown=m.town;o.pcCounty=m.county||'';o.pcAlt=m.alt||'';o.pcParish=m.parish||'';o.pcConstituency=m.constituency||'';o.pcTtwa=m.ttwa||'';o.pcPostTown=m.postTown||'';}});
+  }
+  if(!uniq.length){apply(); return Promise.resolve();}
+  var chunks=[]; for(var i=0;i<uniq.length;i+=100)chunks.push(uniq.slice(i,i+100));
+  var jobs=chunks.map(function(chunk){
+    return fetch('https://api.postcodes.io/postcodes',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({postcodes:chunk})})
+    .then(function(r){return r.json()})
+    .then(function(j){
+      (j.result||[]).forEach(function(item){
+        if(item.result){
+          var cons=item.result.parliamentary_constituency_2024||item.result.parliamentary_constituency||'';
+          var ttwa=item.result.ttwa||'';
+          /* Suggested post town only when constituency and TTWA agree on the same town */
+          var postTown=(cons && ttwa && cons.toLowerCase()===ttwa.toLowerCase())?ttwa:'';
+          pcCache[item.query.toUpperCase()]={
+          valid:true,
+          town:item.result.admin_district||item.result.parish||'',
+          county:item.result.admin_county||'',
+          parish:item.result.parish||'',
+          constituency:cons,
+          ttwa:ttwa,
+          postTown:postTown,
+          alt:[item.result.admin_district,item.result.parish,item.result.parliamentary_constituency,item.result.region,item.result.admin_county].filter(Boolean).join('|').toLowerCase()
+        };}
+        else pcCache[item.query.toUpperCase()]={valid:false,town:'',county:'',alt:'',parish:'',constituency:'',ttwa:'',postTown:''};
+      });
+    })
+    .catch(function(){ /* offline: format and rule checks still apply */ });
+  });
+  return Promise.all(jobs).then(apply);
+}
+
+/* ---------- Royal Mail preview queue: EVERY unverified order, severity only ----------
+   There is no value condition: order value never decides whether an order
+   is checked, and never outranks a worse problem. Rank is P1 HOLD, then
+   P2 FIX, then P3 CONFIRM, then P4 formatting, then orders that passed the
+   rule checks and only need their preview match. Value is a tie-break
+   inside the same severity only. */
+function sevRank(o){ return o.priority>=1&&o.priority<=4 ? o.priority : 5; }
+function queueCompare(a,b){
+  var ra=sevRank(a), rb=sevRank(b);
+  if(ra!==rb)return ra-rb;
+  var va=a.valueNum||0, vb=b.valueNum||0;
+  if(vb!==va)return vb-va;
+  return String(a.order).localeCompare(String(b.order));
+}
+function assignQueue(){
+  var waiting=orders.filter(function(o){return !o.verified;});
+  waiting.sort(queueCompare);
+  orders.forEach(function(o){o.inQueue=false;o.queueNo=0;o.pending=false;o.flagRank=0;});
+  waiting.forEach(function(o,i){
+    o.inQueue=true; o.queueNo=i+1; o.flagRank=i+1;
+    o.displayStatus=(o.priority===0||o.priority===4)?'PREVIEW CHECK':o.status;
+  });
+  orders.forEach(function(o){ if(o.verified)o.displayStatus='OK'; });
+  markDlDirty();
+}
+
+/* ---------- Rendering (paged, so 1,000+ orders stay fast) ---------- */
+function badgeClass(s){return s==='OK'?'b-ok':s==='FIX'?'b-fix':s==='CONFIRM'?'b-confirm':s==='HOLD'?'b-hold':s==='PREVIEW CHECK'?'b-preview':'b-pending'}
+function displayRank(o){
+  if(o.verified)return 100000;
+  if(o.flagRank)return o.flagRank;
+  if(o.priority===4)return 50000;
+  return 60000;
+}
+function render(){
+  var total=orders.length;
+  var ok=orders.filter(function(o){return !!o.verified}).length;
+  var hold=orders.filter(function(o){return o.displayStatus==='HOLD'&&!o.verified}).length;
+  var flag=orders.filter(function(o){return ['FIX','CONFIRM','HOLD'].indexOf(o.displayStatus)>-1&&!o.verified}).length;
+  var awaiting=orders.filter(function(o){return o.displayStatus==='PREVIEW CHECK'&&!o.verified}).length;
+  var q=orders.filter(function(o){return o.inQueue&&!o.verified}).length;
+  $('sTotal').textContent=total; $('sOk').textContent=ok; $('sFlag').textContent=flag; $('sHigh').textContent=awaiting;
+  $('sQueue').textContent=q; $('sPending').textContent=hold;
+  $('slotLabel').textContent=q+' orders waiting · '+ok+' verified'; $('slotMeter').style.width=(total?Math.min(100,ok/total*100):0)+'%';
+  refreshDownloadLinks();
+  $('fileList').innerHTML=fileNames.map(function(f){return '<span class="chip">📄 <b>'+esc(f.brand)+'</b> · '+esc(f.name)+' — '+f.count+' orders'+(f.skipped?' · '+f.skipped+' duplicates skipped':'')+'</span>'}).join('');
+  var sf=$('siteFilter'); var cur=sf.value;
+  var sites=[]; orders.forEach(function(o){if(sites.indexOf(o.site)===-1)sites.push(o.site)});
+  sf.innerHTML='<option value="">All files / brands</option>'+sites.map(function(s){return '<option'+(s===cur?' selected':'')+'>'+esc(s)+'</option>'}).join('');
+
+  var qtxt=norm($('searchBox').value).toLowerCase(), st=$('statusFilter').value, site=sf.value, qf=$('queueFilter').value;
+  var list=orders.filter(function(o){
+    if(st&&o.displayStatus!==st)return false;
+    if(site&&o.site!==site)return false;
+    if(qf==='queue'&&!o.inQueue)return false;
+    if(qf==='verified'&&!o.verified)return false;
+    if(qtxt){var hay=(o.order+' '+o.name+' '+o.postcode+' '+o.ship1+' '+o.ship2+' '+o.shipCity+' '+(o.shipTown||'')+' '+(o.shipPostTownCol||'')+' '+(o.shipVillage||'')+' '+(o.shipLocality||'')+' '+(o.addrPostTown||'')+' '+o.site).toLowerCase(); if(hay.indexOf(qtxt)===-1)return false;}
+    return true;
+  });
+  list.sort(function(a,b){var pa=displayRank(a), pb=displayRank(b); return pa-pb || String(a.order).localeCompare(String(b.order));});
+  if(!orders.length){$('results').innerHTML='<div class="empty"><b>No orders loaded yet.</b><br/>Upload today\'s first export file above — or try the demo orders first to see how the queue works.</div>';$('moreWrap').style.display='none';return;}
+  if(!list.length){$('results').innerHTML='<div class="empty">No orders match this filter.</div>';$('moreWrap').style.display='none';return;}
+  var shown=list.slice(0,renderLimit);
+  $('results').innerHTML=shown.map(function(o){
+    var realIdx=orders.indexOf(o);
+    var status=o.verified?'OK':o.displayStatus;
+    var badge=o.verified?'<span class="badge b-ok">✓ ROYAL MAIL VERIFIED</span>':'<span class="badge '+badgeClass(status)+'">'+esc(status)+'</span>';
+    var queue=o.inQueue&&!o.verified?' <span class="badge b-queue">Preview Queue #'+o.queueNo+'</span>':'';
+    var prio=o.priority?'<span class="badge b-queue">P'+o.priority+'</span>':'';
+    var valBadge=' <span class="badge b-queue">'+esc(fmtMoney(o.valueNum))+'</span>';
+    return '<article class="ordercard">'
+    +'<div class="orderhead"><div><span class="ordno">'+esc(o.order||'—')+'</span> · <span class="cust">'+esc(o.name||'Customer')+'</span><div class="addr">'+esc(o.site)+(o.email?' · '+esc(o.email):'')+'</div></div><div class="rowflex">'+prio+valBadge+badge+queue+'</div></div>'
+    +'<div class="grid2"><div class="box"><span>Shipping address — as exported</span>'+esc(exportedAddr(o)||'—')+'</div>'
+    +'<div class="box"><span>'+(o.verified?'Verified correct address — Royal Mail':(o.priority===1?'Verified address — NOT YET VERIFIED':(o.priority>=2&&o.priority<=3?'Suggested cleaned address — NOT Royal Mail verified yet':'Cleaned address — to be confirmed on Royal Mail')))+'</span>'+esc(o.verified?o.verifiedAddress:o.cleaned)+'</div></div>'
+    +'<div class="box" style="margin-top:10px"><span>Address parts — all included in the cleaned address, in this order</span>Locality: <b>'+esc(o.addrLocality||'— none in file')+'</b> · Village (if any): <b>'+esc(o.addrVillage||'— none')+'</b> · Town: <b>'+esc(o.addrTown||'— missing')+'</b> · Post town: <b>'+esc(o.addrPostTown||'— not detected, confirm on Royal Mail')+'</b> · Postcode: <b>'+esc(o.postcode||'— missing')+'</b></div>'
+    +(o.issues.length?'<p class="issue" style="margin:10px 0 0">Issue: '+esc(o.issues.join(' · '))+'</p>':(o.verified?'<p style="margin:10px 0 0;color:var(--muted)">Verified — the Royal Mail preview address matches this order\'s postcode, street and town exactly.</p>':'<p style="margin:10px 0 0;color:var(--muted)">No issue found by the automatic checks — the postcode exists and a house number and street are present. It still needs its Royal Mail preview match before it counts as verified.</p>'))
+    +'<p style="margin:4px 0 0;font-size:13px;color:var(--muted)">Order value: '+esc(fmtMoney(o.valueNum))+' · Source: '+esc(o.verified?'Royal Mail (team manual check)':o.source)+' · Action: '+esc(actionFor(o))+'</p>'
+    +'<details><summary>Verify on Royal Mail / update the address</summary>'
+    +'<div class="rowflex" style="margin:10px 0"><button class="btn light" onclick="copyPC('+realIdx+')">Copy postcode: '+esc(o.postcode||'—')+'</button><a class="btn light" style="text-decoration:none;display:inline-block" href="https://www.royalmail.com/find-a-postcode" target="_blank" rel="noopener">Open Royal Mail ↗</a></div>'
+    +'<textarea class="verify" id="v-'+realIdx+'" placeholder="Paste the exact address shown on Royal Mail here — e.g. 7 Siddal Grove, Halifax, HX3 9AQ">'+esc(o.verified?o.verifiedAddress:'')+'</textarea>'
+    +'<div class="rowflex" style="margin-top:8px"><button class="btn red" onclick="markVerified('+realIdx+')">✓ Mark Royal Mail Verified</button><button class="btn light" onclick="markHold('+realIdx+')">Mark as HOLD</button><button class="btn ghost" onclick="resetOrder('+realIdx+')">Reset</button></div>'
+    +'</details></article>';
+  }).join('');
+  if(list.length>renderLimit){
+    $('moreWrap').style.display='block';
+    $('moreLabel').textContent='Showing '+shown.length+' of '+list.length+' orders — the queue is worked from the top, so the most urgent orders are already visible.';
+    $('moreBtn').textContent='Show the next ' + Math.min(PAGE_SIZE, list.length-renderLimit) + ' orders';
+  } else {
+    $('moreWrap').style.display='none';
+  }
+}
+function actionFor(o){
+  if(o.verified)return 'Dispatch using the verified address.';
+  if(o.status==='HOLD')return 'Do not dispatch — get the house or business name and number from the customer.';
+  if(o.status==='FIX')return 'Correct it first, then confirm the corrected address on the Royal Mail preview.';
+  if(o.status==='CONFIRM')return 'Resolve the mismatch, then confirm the shipping address on the Royal Mail preview before dispatch.';
+  return 'Check this address on the Royal Mail preview — postcode, street and town must match exactly — then mark it verified.';
+}
+window.copyPC=function(i){var pc=orders[i].postcode||''; if(navigator.clipboard)navigator.clipboard.writeText(pc); };
+/* A pasted Royal Mail preview address only counts as verified when it
+   matches the order on all three parts — postcode, street and town.
+   Anything wrong or mismatched is rejected, never marked verified. */
+function streetKey(line){
+  var s=norm(line).toLowerCase().replace(/,/g,' ');
+  s=s.replace(/^\d+[a-z]?\s+/,''); /* drop the house number */
+  var m=s.match(/([a-z']+)\s+(street|road|lane|avenue|drive|close|way|place|crescent|terrace|gardens|garden|hill|square|walk|row|court|grove|park|fields|field|common|heath|rise|vale|end|bridge|wharf|quay)\b/);
+  if(m)return m[1]+' '+m[2];
+  var words=s.split(/\s+/).filter(function(w){return w.length>3});
+  return words.length?words[words.length-1]:'';
+}
+window.markVerified=function(i){
+  var o=orders[i]; var t=$('v-'+i); var v=norm(t?t.value:'');
+  function reject(msg){ if(t){t.focus(); t.style.borderColor='var(--red)'; t.placeholder='⚠ NOT VERIFIED — '+msg;} }
+  if(!v){ reject('paste the exact address shown in the Royal Mail preview here first, then press Mark Verified again.'); return; }
+  var pastedLow=v.toLowerCase().replace(/\s+/g,' ');
+  var pastedPC=cleanPC(extractPC(v)||'');
+  if(!o.postcode||!pastedPC||pastedPC.replace(/\s/g,'')!==o.postcode.replace(/\s/g,'')){ reject('postcode mismatch: the pasted address has postcode “'+(pastedPC||'none')+'” but this order\'s postcode is “'+(o.postcode||'missing')+'”. Fix the order or paste the correct preview address.'); return; }
+  var sk=streetKey(o.ship1);
+  if(sk&&pastedLow.indexOf(sk)===-1){ reject('street mismatch: the pasted address does not contain this order\'s street (“'+titleCase(sk)+'”). Paste the preview address for this order, not another one.'); return; }
+  var townCands=[o.addrTown,o.addrPostTown,o.shipCity,o.pcTown].map(function(x){return norm(x||'').toLowerCase()}).filter(Boolean);
+  var townOk=townCands.some(function(tc){return pastedLow.indexOf(tc)>-1});
+  if(townCands.length&&!townOk){ reject('town mismatch: the pasted address does not contain this order\'s town or post town (“'+(o.addrTown||o.addrPostTown||o.shipCity)+'”). Check the preview result again.'); return; }
+  o.verified=true; o.verifiedAddress=v; o.pending=false; o.displayStatus='OK'; assignQueue(); render();
+};
+window.markHold=function(i){orders[i].status='HOLD';orders[i].priority=1;orders[i].verified=false;orders[i].verifiedAddress='';orders[i].cleaned='NOT ROYAL MAIL VERIFIED — no verified address yet. Do not dispatch and do not use the exported address as if it were verified. Get the missing details from the customer, verify the exact address on Royal Mail, then paste that Royal Mail address via “Mark Royal Mail Verified”.'; assignQueue(); render();};
+window.resetOrder=function(i){orders[i].verified=false;orders[i].verifiedAddress=''; analyse(orders[i]); assignQueue(); render();};
+
+/* ---------- File loading: one file at a time, in the order added ---------- */
+function readFileText(file){
+  return new Promise(function(resolve){
+    var reader=new FileReader();
+    reader.onload=function(){resolve(String(reader.result||''))};
+    reader.onerror=function(){resolve('')};
+    reader.readAsText(file);
+  });
+}
+function handleFiles(files){
+  if(processing||!files||!files.length)return;
+  processing=true; $('pickBtn').disabled=true; $('pickBtn').textContent='Checking…';
+  var queue=Array.prototype.slice.call(files);
+  var chain=Promise.resolve();
+  queue.forEach(function(file){
+    chain=chain.then(function(){
+      var brand=detectBrand(file.name,fileNames.length);
+      return readFileText(file).then(function(text){
+        var rows=parseCSV(text);
+        if(rows.length<2){fileNames.push({name:file.name,brand:brand,count:0,skipped:0}); render(); return Promise.resolve();}
+        var headers=rows[0].map(function(h){return norm(h).toLowerCase()});
+        var iOrder=pick(headers,['name','order number','order id','order']);
+        var iName=pick(headers,['shipping name','customer name']);
+        if(iOrder>-1&&iName===iOrder)iName=-1;
+        if(iName===-1)iName=pick(headers,['billing name']);
+        var iS1=pick(headers,['shipping address1','shipping address 1','ship address1','address1','address 1','shipping street']);
+        var iS2=pick(headers,['shipping address2','shipping address 2','address2']);
+        var iCity=pick(headers,['shipping city','ship city','city']);
+        var iProv=pick(headers,['shipping province','shipping county','shipping state','province','county','state']);
+        var iTown=pick(headers,['shipping town','town']);
+        var iPostTownCol=pick(headers,['shipping post town','post town','postal town']);
+        var iVillage=pick(headers,['shipping village','village']);
+        var iLocality=pick(headers,['shipping locality','locality','shipping district','district','shipping suburb','suburb','neighbourhood','neighborhood']);
+        var iZip=pick(headers,['shipping zip','shipping postcode','shipping postal','zip','postcode','postal code']);
+        var iEmail=pick(headers,['email','customer email']);
+        var iTotal=pick(headers,['total','grand total','order total','total price','amount paid']);
+        var batch=[],skipped=0;
+        for(var r=1;r<rows.length;r++){
+          var row=rows[r];
+          var ord=val(row,iOrder); if(!ord)continue;
+          /* Shopify repeats an order once per line item, and the same file may be added twice — keep the first copy only */
+          if(orders.some(function(x){return x.order===ord&&x.site===brand})||batch.some(function(x){return x.order===ord})){skipped++;continue;}
+          batch.push(analyse({order:ord,name:val(row,iName),email:val(row,iEmail),site:brand,
+            ship1:val(row,iS1),ship2:val(row,iS2),shipCity:val(row,iCity),shipZip:val(row,iZip),shipProvince:val(row,iProv),
+            shipTown:val(row,iTown),shipPostTownCol:val(row,iPostTownCol),shipVillage:val(row,iVillage),shipLocality:val(row,iLocality),
+            valueNum:parseMoney(val(row,iTotal)),
+            pcValid:null,pcTown:'',pcCounty:'',pcAlt:'',pcParish:'',pcConstituency:'',pcTtwa:'',pcPostTown:'',verified:false,verifiedAddress:''}));
+        }
+        fileNames.push({name:file.name,brand:brand,count:batch.length,skipped:skipped});
+        batch.forEach(function(o){orders.push(o)});
+        assignQueue(); render();
+        return checkPostcodes(batch).then(function(){ batch.forEach(analyse); assignQueue(); render(); });
+      });
+    });
+  });
+  chain.then(function(){ processing=false; $('pickBtn').disabled=false; $('pickBtn').textContent='Select CSV Files'; render(); });
+}
+
+/* ---------- Export ---------- */
+function toCSV(rows){
+  return rows.map(function(r){return r.map(function(c){var s=String(c==null?'':c); return /[",\n]/.test(s)?'"'+s.replace(/"/g,'""')+'"':s;}).join(',')}).join('\n');
+}
+/* ---------- Saving the CSV as an actual file ----------
+   Why it is built this way: on the shared public link, other people
+   open this page inside an embedded (sandboxed) frame — often in an
+   in-app browser (WhatsApp, Facebook, …). The previous approach
+   failed silently there:
+   - showSaveFilePicker does not exist in most phone / in-app
+     browsers and rejects inside cross-origin frames; the fallback
+     click then happened after an async step, so the browser no
+     longer treated it as user-activated and blocked it — while the
+     page still announced "Download started".
+   - a script-created <a> clicked by code is blocked the same way.
+   - a blob: URL cannot be carried into a new tab from a frame with
+     an opaque origin — the tab opened blank.
+   So now the download controls are real <a download> links whose
+   blob href is prepared in advance and replaced only when the data
+   changes (never revoked from under a visible link, never created
+   inside an async step), and "Open CSV in a new tab" writes a small
+   standalone viewer page into the new tab — a full top-level tab,
+   outside this frame — whose own download button carries the file
+   as a data: URL. On phones, Share file… hands the .csv to the
+   share sheet (Files / Drive), which in-app browsers do allow. */
+function makeCsvUrl(content){
+  /* UTF-8 BOM so Excel opens £ signs and accents correctly */
+  var blob=new Blob(['\uFEFF'+content],{type:'text/csv;charset=utf-8'});
+  return URL.createObjectURL(blob);
+}
+function queueList(){ return orders.filter(function(o){return o.inQueue||o.pending}); }
+function csvContent(type){ return exportRows(type==='queue'?queueList():orders); }
+function csvName(type){ return type==='queue'?'royal-mail-queue.csv':'address-checked-'+new Date().toISOString().slice(0,10)+'.csv'; }
+function showDlMessage(msg){
+  var fb=$('dlFallback'); if(!fb)return;
+  fb.style.display='block'; fb.innerHTML=msg;
+}
+function setDlStatus(msg){ var s=$('dlStatus'); if(s)s.textContent=msg; }
+var dlUrls={checked:null,queue:null};
+var panelUrl=null;
+function setDlAnchor(a,url,name){
+  if(!a)return;
+  if(url){ a.href=url; a.setAttribute('download',name); a.classList.remove('dl-off'); }
+  else { a.removeAttribute('href'); a.classList.add('dl-off'); }
+}
+function refreshDownloadLinks(){
+  var alt=$('dlAlt'); if(alt)alt.style.display=orders.length?'':'none';
+  var ht=$('dlHelpText'); if(ht)ht.textContent=orders.length?'Tap a Download button above and the .csv file saves to your device. If nothing arrives in your downloads — common in in-app browsers — use View / Save below and choose “Open CSV in a new tab”.':'Load orders first — the download buttons work as soon as orders are checked.';
+  if(!dlDirty)return;
+  dlDirty=false;
+  ['checked','queue'].forEach(function(type){
+    var has=type==='queue'?queueList().length>0:orders.length>0;
+    var url=has?makeCsvUrl(csvContent(type)):null;
+    var old=dlUrls[type]; dlUrls[type]=url;
+    setDlAnchor(type==='queue'?$('queueExportBtn'):$('exportBtn'),url,csvName(type));
+    if(old)setTimeout(function(){URL.revokeObjectURL(old)},1000);
+  });
+  var panel=$('csvPanel');
+  if(panel&&panel.style.display!=='none')setPanelLink();
+}
+function setPanelLink(){
+  var url=makeCsvUrl(csvContent(csvPanelType));
+  var old=panelUrl; panelUrl=url;
+  setDlAnchor($('saveCsvLink'),url,csvName(csvPanelType));
+  if(old)setTimeout(function(){URL.revokeObjectURL(old)},1000);
+  refreshShareBtn();
+}
+function refreshShareBtn(){
+  var b=$('shareCsvBtn'); if(!b)return;
+  var ok=false;
+  try{ ok=!!(navigator.canShare&&navigator.share)&&navigator.canShare({files:[new File(['x'],'x.csv',{type:'text/csv'})]}); }catch(e){ ok=false; }
+  b.style.display=ok?'':'none';
+}
+function shareCsv(){
+  var name=csvName(csvPanelType);
+  var file=new File(['\uFEFF'+csvContent(csvPanelType)],name,{type:'text/csv;charset=utf-8'});
+  navigator.share({files:[file],title:name}).then(function(){ setDlStatus('File shared: '+name); }).catch(function(err){
+    if(err&&err.name==='AbortError')return;
+    showDlMessage('<b>Sharing was blocked by this browser.</b> Use “Save as .csv file” or “Open CSV in a new tab” in this panel instead.');
+  });
+}
+function openCsvViewer(type){
+  var list=type==='queue'?queueList():orders;
+  if(!list.length){
+    showDlMessage(type==='queue'?'<b>Nothing in the preview queue.</b> Every order that is loaded and not yet verified appears in the preview queue file.':'<b>No orders loaded yet.</b> Upload a CSV file above (or try the demo orders) first.');
+    return;
+  }
+  var content=csvContent(type), name=csvName(type);
+  var w=null;
+  try{ w=window.open('','_blank'); }catch(e){ w=null; }
+  if(!w){
+    showDlMessage('<b>The new tab was blocked.</b> Allow pop-ups for this page and try again — or use “Save as .csv file” in the View / Save panel.');
+    return;
+  }
+  var dataHref='data:text/csv;charset=utf-8,'+encodeURIComponent('\uFEFF'+content);
+  var html='<!doctype html><html lang="en"><head><meta charset="utf-8"/><meta name="viewport" content="width=device-width, initial-scale=1"/><title>'+esc(name)+'</title>'
+  +'<style>body{font-family:system-ui,sans-serif;margin:20px;line-height:1.5;background:#f4f5f3;color:#17201b}h1{font-size:20px;word-break:break-all}a.dl{display:inline-block;background:#c8102e;color:#fff;font-weight:700;padding:12px 18px;border-radius:9px;text-decoration:none}textarea{width:100%;height:55vh;margin-top:12px;padding:10px;border:1px solid #ccd;border-radius:9px;font-family:monospace;font-size:12px}</style></head><body>'
+  +'<h1>'+esc(name)+'</h1>'
+  +'<p>This tab is a full browser tab, so its download button also works in browsers that block downloads from the embedded checker page.</p>'
+  +'<p><a class="dl" href="'+dataHref+'" download="'+esc(name)+'">⬇ Download '+esc(name)+'</a></p>'
+  +'<p>On a phone you can also use your browser\u2019s Share menu → Save to Files. The full CSV text is below if you need to copy it.</p>'
+  +'<textarea readonly>'+esc(content)+'</textarea>'
+  +'</body></html>';
+  w.document.open(); w.document.write(html); w.document.close();
+  setDlStatus('Opened in a new tab: '+name+' — use the download button at the top of that tab to save the file.');
+}
+function dlAnchorGuard(type){
+  return function(e){
+    var has=type==='queue'?queueList().length>0:orders.length>0;
+    if(!has){
+      e.preventDefault();
+      showDlMessage(type==='queue'?'<b>Nothing in the preview queue.</b> Every order that is loaded and not yet verified appears in the preview queue file.':'<b>No orders loaded yet.</b> Upload a CSV file above (or try the demo orders) first — then tap Download again.');
+      setDlStatus('');
+      return;
+    }
+    setDlStatus('Your browser was asked to download '+csvName(type)+' — check your downloads folder. If nothing arrived, open View / Save below and choose “Open CSV in a new tab”.');
+  };
+}
+function openCsvPanel(type){
+  csvPanelType=type;
+  var isQ=type==='queue';
+  $('csvPanelTitle').textContent=isQ?'Preview Queue (.csv file)':'Checked Sheet (.csv file)';
+  $('csvText').value=csvContent(type);
+  $('csvPanel').style.display='block';
+  $('copyStatus').textContent='';
+  setPanelLink();
+  $('csvPanel').scrollIntoView({behavior:'smooth',block:'nearest'});
+}
+function exportRows(list){
+  var rows=[['Order','File / Brand','Customer','Order Value','Shipping Address As Exported','Locality','Village (if any)','Town','Post Town','County / State (as exported)','Status','Priority','Issue','Verified Address — Royal Mail Only','Suggested Cleaned Address — Not Royal Mail Verified','Verification Source','Preview Queue','Action']];
+  var sorted=list.slice().sort(function(a,b){return displayRank(a)-displayRank(b)});
+  sorted.forEach(function(o){rows.push([o.order,o.site,o.name,o.valueNum==null?'':o.valueNum.toFixed(2),exportedAddr(o),o.addrLocality||'',o.addrVillage||'',o.addrTown||'',o.addrPostTown||'',o.shipProvince||'',o.verified?'ROYAL MAIL VERIFIED':o.displayStatus,o.priority?('P'+o.priority):'',o.issues.join(' | '),o.verified?o.verifiedAddress:'',o.verified?'':o.cleaned,o.verified?'Royal Mail preview (team check — postcode, street and town matched)':o.source,o.inQueue?('#'+o.queueNo):'',actionFor(o)]);});
+  return toCSV(rows);
+}
+
+/* ---------- Demo data (sample orders for team training — order values are shown for reference only; there is no value condition) ---------- */
+var DEMO=[
+ {order:'#DEMO-01',name:'Sample — Clean Order, Needs Preview Check',valueNum:24.99,ship1:'12 High Street',ship2:'',shipCity:'Leeds',shipZip:'LS1 4DY'},
+ {order:'#DEMO-02',name:'Sample — Street Missing',valueNum:64.00,ship1:'7',ship2:'',shipCity:'Halifax',shipZip:'HX3 9AQ'},
+ {order:'#DEMO-03',name:'Sample — No House Number',valueNum:27.50,ship1:'Forty Acre Road',ship2:'Boongate',shipCity:'Peterborough',shipZip:'PE1 5PS'},
+ {order:'#DEMO-04',name:'Sample — House Name Only, No Number',valueNum:89.99,ship1:'Sows Ear Cottage',ship2:'Farm Yard',shipCity:'Canterbury',shipZip:'CT3 1AA'},
+ {order:'#DEMO-05',name:'Sample — Possible Spelling Issue',valueNum:31.20,ship1:'35 Yewtree Place',ship2:'',shipCity:'Evesham',shipZip:'WR11 1AB'},
+ {order:'#DEMO-06',name:'Sample — Postcode Does Not Exist',valueNum:120.00,ship1:'10 Mill Lane',ship2:'',shipCity:'Dover',shipZip:'CT99 9ZZ'},
+ {order:'#DEMO-07',name:'Sample — Missing Post Town (fictitious example)',valueNum:42.00,ship1:'Rose Cottage, Mill Lane',ship2:'',shipCity:'Millford',shipZip:'ZZ9 9ZZ'},
+ {order:'#DEMO-08',name:'Sample — Locality, Village, Town and Post Town All Present (fictitious example)',valueNum:38.00,ship1:'4 Mill Cottages',ship2:'',shipLocality:'Lower Mill',shipVillage:'Millford',shipTown:'Northfield',shipPostTownCol:'Sampleton',shipCity:'Northfield',shipZip:'ZZ9 9ZZ'}
+];
+
+/* ---------- Events ---------- */
+var dz=$('dropZone'), fi=$('fileInput');
+dz.addEventListener('click',function(){fi.click()});
+dz.addEventListener('dragover',function(e){e.preventDefault();dz.classList.add('over')});
+dz.addEventListener('dragleave',function(){dz.classList.remove('over')});
+dz.addEventListener('drop',function(e){e.preventDefault();dz.classList.remove('over'); if(e.dataTransfer.files.length)handleFiles(e.dataTransfer.files);});
+fi.addEventListener('change',function(){if(fi.files.length)handleFiles(fi.files); fi.value='';});
+$('pickBtn').addEventListener('click',function(e){e.stopPropagation();fi.click()});
+$('demoBtn').addEventListener('click',function(e){
+  e.stopPropagation();
+  var brand='Demo (Sample)';
+  var batch=DEMO.map(function(d){return analyse(Object.assign({},d,{site:brand,email:'',ship2:d.ship2||'',pcValid:null,pcTown:'',pcCounty:'',pcAlt:'',pcParish:'',pcConstituency:'',pcTtwa:'',pcPostTown:'',verified:false,verifiedAddress:''}))});
+  batch.forEach(function(o){orders.push(o)});
+  /* The demo's invalid postcode is marked directly so the demo works the same with or without a connection */
+  batch.forEach(function(o){ if(o.order==='#DEMO-06'){o.pcValid=false; analyse(o); o.issues.push('Demo note: this postcode does not exist in real life');}});
+  /* DEMO-07 is a fully fictitious, simulated example (invented house, village, post town
+     and postcode — not a real address), so the missing-post-town rule can be shown in the
+     demo without any live data: the file shows only the village, the post town is missing. */
+  function applyDemo07(o){ o.pcValid=true; o.pcParish='Millford'; o.pcConstituency='Sampleton'; o.pcTtwa='Sampleton'; o.pcPostTown='Sampleton'; o.pcAlt='millford|sampleton'; analyse(o); if(o.issues.indexOf('Demo note: fictitious sample — village and post town are invented for training')===-1)o.issues.push('Demo note: fictitious sample — village and post town are invented for training'); }
+  /* DEMO-08 is likewise fully fictitious and simulated (invented locality, village,
+     town, post town and postcode), so the full address-parts structure can be shown:
+     its cleaned address must read 4 Mill Cottages, Lower Mill, Millford, Northfield,
+     Sampleton, ZZ9 9ZZ — locality, village, town and post town all present, in order. */
+  function applyDemo08(o){ o.pcValid=true; analyse(o); if(o.issues.indexOf('Demo note: fictitious sample — locality, village, town and post town are invented for training')===-1)o.issues.push('Demo note: fictitious sample — locality, village, town and post town are invented for training'); }
+  batch.forEach(function(o){ if(o.order==='#DEMO-07')applyDemo07(o); if(o.order==='#DEMO-08')applyDemo08(o); });
+  fileNames.push({name:'Demo orders (samples — not real orders)',brand:brand,count:batch.length,skipped:0});
+  renderLimit=PAGE_SIZE; assignQueue(); render();
+  /* Then run the same live postcodes.io check as a real file; DEMO-07's simulated fields are restored afterwards because its postcode is invented */
+  checkPostcodes(batch).then(function(){ batch.forEach(function(o){ if(o.order==='#DEMO-06'){o.pcValid=false;} analyse(o); if(o.order==='#DEMO-06'&&o.issues.indexOf('Demo note: this postcode does not exist in real life')===-1)o.issues.push('Demo note: this postcode does not exist in real life'); if(o.order==='#DEMO-07')applyDemo07(o); if(o.order==='#DEMO-08')applyDemo08(o); }); assignQueue(); render(); });
+});
+['searchBox','statusFilter','siteFilter','queueFilter'].forEach(function(id){$(id).addEventListener('input',function(){renderLimit=PAGE_SIZE;render();});$(id).addEventListener('change',function(){renderLimit=PAGE_SIZE;render();});});
+$('moreBtn').addEventListener('click',function(){renderLimit+=PAGE_SIZE;render();});
+$('clearBtn').addEventListener('click',function(){orders=[];fileNames=[];renderLimit=PAGE_SIZE;$('csvPanel').style.display='none';$('dlFallback').style.display='none';assignQueue();render();});
+/* The download and View / Save buttons are always tappable: with no
+   orders loaded they explain why, instead of looking dead or silently
+   doing nothing (the old View / Copy handlers returned without a word
+   when the list was empty). */
+$('exportBtn').addEventListener('click',dlAnchorGuard('checked'));
+$('queueExportBtn').addEventListener('click',dlAnchorGuard('queue'));
+$('viewCsvBtn').addEventListener('click',function(){ if(orders.length)openCsvPanel('checked'); else showDlMessage('<b>No orders loaded yet.</b> Upload a CSV file above (or try the demo orders) first.'); });
+$('viewQueueBtn').addEventListener('click',function(){ if(queueList().length)openCsvPanel('queue'); else showDlMessage('<b>Nothing in the preview queue.</b> It lists every loaded order that is not yet verified — load orders first.'); });
+$('openTabBtn').addEventListener('click',function(){ openCsvViewer(csvPanelType); });
+$('shareCsvBtn').addEventListener('click',function(){ shareCsv(); });
+$('closeCsvBtn').addEventListener('click',function(){ $('csvPanel').style.display='none'; });
+$('copyCsvBtn').addEventListener('click',function(){
+  var t=$('csvText'); var txt=t.value;
+  function done(ok){ $('copyStatus').textContent=ok?'Copied — paste it into a .csv file or a spreadsheet.':'Copy was blocked — the text is selected, so copy it manually (Ctrl+C / Copy).'; }
+  t.focus(); t.select();
+  if(navigator.clipboard&&navigator.clipboard.writeText){ navigator.clipboard.writeText(txt).then(function(){done(true)},function(){ var ok=false; try{ok=document.execCommand('copy')}catch(err){} done(ok); }); }
+  else { var ok2=false; try{ok2=document.execCommand('copy')}catch(err){} done(ok2); }
+});
+
+var d=new Date(); var days=['Sun','Mon','Tue','Wed','Thu','Fri','Sat']; var months=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+$('todayLabel').textContent=days[d.getDay()]+', '+d.getDate()+' '+months[d.getMonth()]+' '+d.getFullYear();
+render();
+</script>
+</body>
+</html>
