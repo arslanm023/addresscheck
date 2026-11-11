@@ -98,7 +98,7 @@ details{margin-top:10px} summary{cursor:pointer;font-weight:700;font-size:14px}
     <div>
       <div class="eyebrow">Dispatch Team · Free Method — No Paid API</div>
       <h1>Daily Address Checker</h1>
-      <p class="lead">Upload today's order export files one by one. <b>Every</b> order's shipping address is checked, whatever its value — there is no £30 condition and no value priority anywhere. The billing address is ignored completely. Each shipping address must match <b>exactly</b> on all three parts — <b>postcode, street, and town / county (state)</b> — first against the free postcodes.io data, then against the <b>Royal Mail preview</b>: paste the address on Royal Mail, compare the preview result line by line, and only an exact match counts as verified. Any wrong or mismatched part flags the order — it is never passed as OK. Every cleaned address is built with <b>all</b> of its parts, in Royal Mail order: house / street, <b>locality</b>, <b>village (if any)</b>, <b>town</b>, <b>post town</b>, then the postcode — no part is dropped, and no part is repeated.</p>
+      <p class="lead">Upload today's order export files one by one. <b>Every</b> order's shipping address is checked, whatever its value — there is no £30 condition and no value priority anywhere. The billing address is ignored completely. Each shipping address must match <b>exactly</b> on all three parts — <b>postcode, street, and town / county (state)</b> — first against the free postcodes.io data, then against the <b>Royal Mail preview</b>: paste the address on Royal Mail, compare the preview result line by line, and only an exact match counts as verified. Any wrong or mismatched part flags the order — it is never passed as OK. There is no separate village / town breakdown and no guessed suggestion: the final suggested address is one simple line — exactly the accurate address the <b>Royal Mail preview</b> shows for that order (see the worked example in section 2). If the preview does not show an exact match for the exported address, the order is simply flagged <b>“Manually verify this one”</b>.</p>
     </div>
     <div class="datepill"><span>Today</span><b id="todayLabel">—</b><span>No order limit — 1,000+ orders a day supported</span><span style="display:block">Every order gets a Royal Mail preview check — no value condition</span></div>
   </div>
@@ -114,13 +114,13 @@ details{margin-top:10px} summary{cursor:pointer;font-weight:700;font-size:14px}
 
   <div class="steps">
     <div class="step"><i>1</i><b>Upload files one by one</b><p>Add each export file in turn. You do not need to enter a website or brand name — it is detected automatically from the file name.</p></div>
-    <div class="step"><i>2</i><b>The check runs automatically</b><p>Each postcode is checked live via the free <b>postcodes.io</b> service: the postcode must exist, and the town and county (state) in the file must match the postcode's area — any mismatch is flagged, never passed. House number, street, locality, village, town and post town rules are then applied to the shipping address of every order, whatever its value. The billing address is ignored — it is never checked or matched.</p></div>
-    <div class="step"><i>3</i><b>Verify every order on the Royal Mail preview</b><p>Every order goes into the preview queue, worst first: HOLD, then FIX, then CONFIRM, then the rest — order value plays no part. On Royal Mail, paste the address and read the <b>preview</b> result: the postcode, street and town in the preview must match the shipping address exactly. Paste the preview address into the order card and press <b>Mark Royal Mail Verified</b> — the checker re-checks the pasted address against the order's postcode, street and town and rejects it if anything does not match.</p></div>
+    <div class="step"><i>2</i><b>The check runs automatically</b><p>Each postcode is checked live via the free <b>postcodes.io</b> service: the postcode must exist, and the town and county (state) in the file must match the postcode's area — any mismatch is flagged, never passed. House number, street, town and county (state) rules are then applied to the shipping address of every order, whatever its value. The billing address is ignored — it is never checked or matched.</p></div>
+    <div class="step"><i>3</i><b>Verify every order on the Royal Mail preview</b><p>Every order goes into the preview queue, worst first: HOLD, then FIX, then CONFIRM, then the rest — order value plays no part. Use <b>Copy address for Royal Mail search</b> on the order card, paste that one line into Royal Mail, and pick the accurate <b>preview</b> match — the postcode, street and town in the preview must match the shipping address exactly. Paste the preview address back into the order card and press <b>Mark Royal Mail Verified</b>: that pasted preview line becomes the order's <b>final suggested address</b> in the downloaded sheet. The checker re-checks the pasted address against the order's postcode, street and town — if nothing in the preview matches exactly, do not paste a near match: the order is flagged <b>“Manually verify this one”</b> instead.</p></div>
   </div>
 
   <section class="panel">
     <h2>1 — Today's export files</h2>
-    <p class="desc">Shopify CSV exports (orders_export) work as they are — the checker reads the order number, the shipping address, and the order total. Billing address columns are ignored completely: the billing address is never verified or matched against the shipping address. Other CSVs also work if they have Order, Address, City, Postcode and Total columns — a Province / County (state) column is read too, and matched against the postcode's county — and if a file has separate <b>Locality</b>, <b>Village</b>, <b>Town</b> or <b>Post Town</b> columns, those are read too and kept as parts of the address (Address line 2 is also kept as the locality line). Files are checked in the order you add them, and nothing is uploaded anywhere — everything runs in this browser.</p>
+    <p class="desc">Shopify CSV exports (orders_export) work as they are — the checker reads the order number, the shipping address, and the order total. Billing address columns are ignored completely: the billing address is never verified or matched against the shipping address. Other CSVs also work if they have Order, Address, City, Postcode and Total columns — a Province / County (state) column is read too, and matched against the postcode's county — and address lines 1 and 2 are kept together as the one shipping address that is searched on Royal Mail. Files are checked in the order you add them, and nothing is uploaded anywhere — everything runs in this browser.</p>
     <div class="drop" id="dropZone" tabindex="0" role="button" aria-label="Upload CSV files">
       <b>Drop CSV files here, or click to select them</b>
       <p>Add files one by one or several at once · No daily order limit · The brand name is set automatically from each file name</p>
@@ -140,7 +140,7 @@ details{margin-top:10px} summary{cursor:pointer;font-weight:700;font-size:14px}
 
   <section class="panel" id="resultsPanel">
     <h2>2 — Checked orders</h2>
-    <p class="desc">Orders are shown in queue order: worst problems first (work from #1 down), then the orders that passed the rule checks and are waiting for their preview match. <b>P1 HOLD</b> means do not dispatch, <b>P2 FIX</b> means correct it first, <b>P3 CONFIRM</b> means a part of the shipping address does not match and must be resolved. P4 is formatting only. <b>No order is OK until it is verified:</b> an order counts as verified only when the Royal Mail preview address has been pasted in, marked verified, and its <b>postcode, street and town all match</b> the shipping address exactly — the checker rejects a pasted address that does not match. Orders that pass the automatic checks show <b>PREVIEW CHECK</b> until then.<br/><b>A cleaned address is not a verified address.</b> For HOLD orders the verified field no longer copies the exported address — it stays marked <b>NOT ROYAL MAIL VERIFIED</b> until the exact Royal Mail address is pasted in and marked verified. For other flagged orders the cleaned address is a <b>suggestion only</b>, including a missing post town where one is detected — for example a file that shows only a village name, where Royal Mail's address also lists the post town before the postcode — and it must still be confirmed on Royal Mail.<br/><b>Address parts:</b> every order card now breaks the address into its parts — <b>Locality · Village (if any) · Town · Post town</b> — and the cleaned address always contains all of them, in that order, before the postcode: the locality and village from the file (Address line 2 or its own Locality / Village column, or the parish for that postcode where it names a village that is missing from the file), the town from the file's City / Town, and the post town from the file or, where the file misses it, the detected post town. A part that is already inside another line is not repeated, and an order with no town and no post town at all is flagged CONFIRM.</p>
+    <p class="desc">Orders are shown in queue order: worst problems first (work from #1 down), then the orders that passed the rule checks and are waiting for their preview match. <b>P1 HOLD</b> means do not dispatch, <b>P2 FIX</b> means correct it first, <b>P3 CONFIRM</b> means a part of the shipping address does not match and must be resolved. P4 is formatting only. <b>No order is OK until it is verified:</b> an order counts as verified only when the Royal Mail preview address has been pasted in, marked verified, and its <b>postcode, street and town all match</b> the shipping address exactly — the checker rejects a pasted address that does not match. Orders that pass the automatic checks show <b>PREVIEW CHECK</b> until then.<br/><b>How the final suggestion works — kept simple:</b> copy the exported shipping address from the order card, paste it into Royal Mail search, and read the preview. The accurate preview match is the final suggestion — one simple address line, exactly as Royal Mail shows it, with nothing broken out into separate village or town columns. Worked example (fictitious, for training): the file shows <b>“Rose Cottage, Northfield, ZZ9 9ZZ”</b> and the Royal Mail preview shows <b>“Rose Cottage, Chapel Lane, Little Millford, Northfield, ZZ9 9ZZ”</b> — so that preview line, with the street (Chapel Lane) and village (Little Millford) that Royal Mail adds, is the final suggested address once it is pasted into the order card and marked verified. Those extra lines only ever come from the Royal Mail preview — the checker does not invent them, which is why an exported address like this one is missing them until the preview is pasted in. If the preview does not show an address that matches the exported address exactly, the order is flagged <b>“Manually verify this one”</b> and no guessed address is put forward as the suggestion. For HOLD orders the final suggestion stays empty until the exact Royal Mail address is pasted in and marked verified — the exported address is never copied into the final suggestion as if it were verified.</p>
     <div class="controls">
       <input id="searchBox" placeholder="Search order no, name, postcode, street…"/>
       <select id="statusFilter"><option value="">All statuses</option><option value="OK">OK — Verified</option><option>FIX</option><option>CONFIRM</option><option>HOLD</option><option>PREVIEW CHECK</option></select>
@@ -175,12 +175,12 @@ details{margin-top:10px} summary{cursor:pointer;font-weight:700;font-size:14px}
   <section class="panel">
     <h2>The team's daily routine</h2>
     <div class="grid2">
-      <div class="box"><span>Royal Mail preview check — a couple of minutes per order</span>On a queued order, copy the postcode → open <a href="https://www.royalmail.com/find-a-postcode" target="_blank" rel="noopener">royalmail.com/find-a-postcode</a> → paste the address and read the <b>preview</b> result → check the preview's postcode, street and town against the shipping address, part by part → paste the preview address into the order card here and press <b>Mark Royal Mail Verified</b>. If any part differs, fix the order first — do not mark it verified. Every order needs this, whatever its value.</div>
+      <div class="box"><span>Royal Mail preview check — a couple of minutes per order</span>On a queued order, use <b>Copy address for Royal Mail search</b> on the order card → open <a href="https://www.royalmail.com/find-a-postcode" target="_blank" rel="noopener">royalmail.com/find-a-postcode</a> → paste the address and read the <b>preview</b> result → check the preview's postcode, street and town against the shipping address, part by part → paste the preview address into the order card here and press <b>Mark Royal Mail Verified</b>. That pasted preview address becomes the order's final suggested address in the downloaded sheet. If the preview shows no exact match, do not mark it verified — the order stays flagged <b>“Manually verify this one”</b>. Every order needs this, whatever its value.</div>
       <div class="box"><span>HOLD orders</span>HOLD means the house number or postcode itself is missing or wrong — for example an order with only a street name and no number. <b>Do not dispatch these.</b> Get the house or business name and number from the customer first.</div>
       <div class="box"><span>CONFIRM orders</span>CONFIRM means something in the <b>shipping</b> address needs a second look — for example the town does not match the postcode, or there is a house name but no number. Verify the shipping address on Royal Mail before dispatch. The billing address is ignored completely and is never checked.</div>
       <div class="box"><span>End of day</span>Download the Checked Sheet CSV and keep it — it records every order's status, issue, order value, queue position and verified address. Any order still in the preview queue at the end of the day is <b>not</b> verified — it carries over as the team's list for the next day, not as a checked order.</div>
     </div>
-    <p class="desc" style="margin-top:12px">What this checker cannot do on its own: postcodes.io confirms that a postcode exists — it does not confirm the individual house, and it has no official post-town field. Where its constituency and travel-to-work area agree on a town that is missing from the file (for example, the file shows only a village while both agree on the nearby post town), the checker flags a <b>missing post town</b>, puts that town into the <b>suggested</b> cleaned address as the post town part, and queues the order as a FIX — but only Royal Mail's own address list confirms it. The same honesty applies to the other parts: the locality and village come from the file itself (Address line 2, or a Locality / Village column), with the postcode's parish used only as a <b>suggested</b> village where the file has none, and the town from the file's City / Town — all four parts (locality, village if any, town, post town) are carried into the cleaned address and the downloaded sheet, but none of them makes an address Royal Mail verified on its own. Fine spelling differences (Alexandra vs Alexander, Yew Tree vs Yewtree, Upper Brow vs Upperbrow) also only show up on Royal Mail, which is why flagged orders must not skip the Royal Mail step, and why a HOLD order's verified field is never filled with a copy of the exported address.</p>
+    <p class="desc" style="margin-top:12px">What this checker cannot do on its own: it cannot fetch the Royal Mail preview for you — the preview is read by the team on Royal Mail's own site. postcodes.io confirms that a postcode exists and which town and county it belongs to; it does not confirm the individual house, the street a named house sits on, or its village — those extra lines (Chapel Lane and Little Millford in the worked example above) only come from the Royal Mail preview. That is why the final suggested address in the downloaded sheet is the pasted preview address and nothing else: before the preview is pasted in and marked verified, there is no final suggestion — only the exported address, the checks on it, and, where the preview shows no exact match, a “manually verify this one” flag. Fine spelling differences (Alexandra vs Alexander, Yew Tree vs Yewtree, Upper Brow vs Upperbrow) also only show up on Royal Mail, which is why flagged orders must not skip the Royal Mail step, and why a HOLD order's final suggestion is never filled with a copy of the exported address.</p>
   </section>
 
   <p class="footer">Daily Address Checker · Free postcode check (postcodes.io) + Royal Mail preview check for every order + manual verification · No order limit · No value condition — the queue is severity order only</p>
@@ -199,10 +199,11 @@ function norm(s){return String(s||'').trim().replace(/\s+/g,' ')}
 function titleCase(s){return norm(s).toLowerCase().replace(/\b\w/g,function(c){return c.toUpperCase()})}
 function parseMoney(s){ if(s==null||s==='')return null; var n=parseFloat(String(s).replace(/[^0-9.\-]/g,'')); return isNaN(n)?null:n; }
 function fmtMoney(n){ return n==null?'—':'£'+n.toFixed(2); }
-/* Address parts — locality, village, town and post town are parts of the
-   address in their own right, alongside the existing checks. A part is
+/* Joining address lines into ONE simple address line (used for the
+   exported address that is pasted into Royal Mail search). A line is
    added once only: if it is already inside an earlier line (for example
-   the village already inside Address line 1) it is not repeated. */
+   the village already inside Address line 1) it is not repeated. Lines
+   are never reported back as separate village / town parts. */
 function addAddrPart(parts,raw){
   var p=titleCase(norm(raw)); if(!p)return;
   var low=p.toLowerCase();
@@ -304,16 +305,15 @@ function analyse(o){
     var candPT=norm(o.pcPostTown);
     var allAddrText=(full+' '+city).toLowerCase();
     if(candPT && allAddrText.indexOf(candPT.toLowerCase())===-1){
-      issues.push('Missing post town: the file shows “'+(city||o.pcParish||'the locality')+'” only — Royal Mail adds the post town “'+titleCase(candPT)+'” for this postcode. Add “'+titleCase(candPT)+'” before the postcode and confirm the exact address on Royal Mail');
+      issues.push('Missing post town: the file shows “'+(city||o.pcParish||'the locality')+'” only — Royal Mail adds the post town “'+titleCase(candPT)+'” for this postcode. Confirm the exact address in the Royal Mail preview; if the preview does not match exactly, manually verify this one');
       if(priority===0||priority>2)priority=2;
     }
   }
-  /* Village (if any) is part of the address too. The file's own Village column
-     wins; otherwise postcodes.io's parish for the postcode names the village /
-     civil parish — where that village is missing from the file and is not the
-     town or post town, it is added to the suggested cleaned address as the
-     village part and flagged to confirm on Royal Mail (suggestion only, never
-     presented as Royal Mail verified). */
+  /* Internal check only: if the file has no village line but postcodes.io's
+     parish for the postcode names one that is missing from the file (and is
+     not the town or post town), the order is flagged to confirm in the Royal
+     Mail preview. The village is never added to any suggestion by the
+     checker — that line only ever comes from the preview itself. */
   var villageCand='';
   if(o.pcValid===true && !norm(o.shipVillage) && o.pcParish){
     var parLow=norm(o.pcParish).toLowerCase();
@@ -321,7 +321,7 @@ function analyse(o){
     var ptLow=(norm(o.shipPostTownCol)||norm(o.pcPostTown||'')).toLowerCase();
     if(parLow && parLow!==townLow && parLow!==ptLow && parLow!==(o.pcTown||'').toLowerCase() && (full+' '+city).toLowerCase().indexOf(parLow)===-1){
       villageCand=titleCase(o.pcParish);
-      issues.push('Village missing from the file: the parish for this postcode is “'+villageCand+'” — it is added to the suggested cleaned address as the village part. Confirm the exact address on Royal Mail');
+      issues.push('Village missing from the file: the parish for this postcode is “'+villageCand+'” — the village line only comes from the Royal Mail preview. Confirm the exact address in the preview; if it does not match exactly, manually verify this one');
       if(!priority)priority=3;
     }
   }
@@ -340,14 +340,16 @@ function analyse(o){
   if(priority===1)status='HOLD'; else if(priority===2)status='FIX'; else if(priority===3)status='CONFIRM'; else status='OK';
   o.priority=priority; o.status=status; o.issues=issues; o.source=source;
   var candClean=(o.pcValid===true && o.pcPostTown)?titleCase(o.pcPostTown):'';
-  /* Structured address parts, stored for the order card and the CSV export */
+  /* Town / post town values kept internally only, for the exact-match
+     validation of a pasted preview address — they are not shown or
+     exported as separate address parts. */
   o.addrLocality=titleCase(norm(o.shipLocality)||norm(a2));
   o.addrVillage=titleCase(norm(o.shipVillage)||villageCand);
   o.addrTown=titleCase(norm(o.shipTown)||norm(city));
   o.addrPostTown=titleCase(norm(o.shipPostTownCol)||candClean);
-  /* Cleaned address — every part, in Royal Mail order, none dropped and
-     none repeated: house / street, locality, village (if any), town,
-     post town, postcode. */
+  /* Working cleaned address (internal only — no longer shown or exported
+     as the suggestion; the final suggestion is the Royal Mail preview
+     address only). */
   var cleanParts=[];
   addAddrPart(cleanParts,a1);
   addAddrPart(cleanParts,a2);
@@ -360,15 +362,19 @@ function analyse(o){
   addAddrPart(cleanParts,candClean);
   if(pc)cleanParts.push(pc);
   o.suggestedCleaned=cleanParts.join(', ');
-  /* A HOLD order has no verified address yet, so its cleaned / verified field must NOT
+  /* A HOLD order has no verified address yet, so its final-suggestion field must NOT
      be a copy of the exported address — that copy is exactly what made an unverified
-     address look verified. Only a pasted Royal Mail address (Mark Royal Mail Verified)
-     fills the verified field. Other flagged orders show the suggested cleaned address
-     (with the post-town correction where detected), clearly labelled as not verified. */
+     address look verified. Only a pasted Royal Mail preview address (Mark Royal Mail
+     Verified) fills the final suggested address, for every order. */
   if(priority===1){
-    o.cleaned='NOT ROYAL MAIL VERIFIED — no verified address yet. Do not dispatch and do not use the exported address as if it were verified. Get the missing details from the customer, verify the exact address on Royal Mail, then paste that Royal Mail address via “Mark Royal Mail Verified”.';
+    o.cleaned='NOT ROYAL MAIL VERIFIED — no final suggested address yet. Do not dispatch and do not use the exported address as if it were verified. Get the missing details from the customer, verify the exact address on Royal Mail, then paste that Royal Mail preview address via “Mark Royal Mail Verified” — the pasted preview line becomes the final suggested address.';
   } else {
-    o.cleaned=o.suggestedCleaned;
+    /* No guessed suggestion: the final suggested address is only ever the
+       Royal Mail preview address the team pastes in. Until then this field
+       says so plainly, instead of presenting a checker-built address (which
+       cannot contain lines only Royal Mail knows, like a named house's
+       street and village) as the suggestion. */
+    o.cleaned='No final suggestion yet — search the exported address on Royal Mail and paste the accurate preview match into this order card. That preview line becomes the final suggested address in the downloaded sheet. If the preview has no exact match, this order is “manually verify this one” only.';
   }
   if(!o.cleaned) o.cleaned='—';
   return o;
@@ -479,18 +485,19 @@ function render(){
     var status=o.verified?'OK':o.displayStatus;
     var badge=o.verified?'<span class="badge b-ok">✓ ROYAL MAIL VERIFIED</span>':'<span class="badge '+badgeClass(status)+'">'+esc(status)+'</span>';
     var queue=o.inQueue&&!o.verified?' <span class="badge b-queue">Preview Queue #'+o.queueNo+'</span>':'';
+    var mv=o.manualVerify&&!o.verified?' <span class="badge b-hold">MANUALLY VERIFY</span>':'';
     var prio=o.priority?'<span class="badge b-queue">P'+o.priority+'</span>':'';
     var valBadge=' <span class="badge b-queue">'+esc(fmtMoney(o.valueNum))+'</span>';
     return '<article class="ordercard">'
-    +'<div class="orderhead"><div><span class="ordno">'+esc(o.order||'—')+'</span> · <span class="cust">'+esc(o.name||'Customer')+'</span><div class="addr">'+esc(o.site)+(o.email?' · '+esc(o.email):'')+'</div></div><div class="rowflex">'+prio+valBadge+badge+queue+'</div></div>'
-    +'<div class="grid2"><div class="box"><span>Shipping address — as exported</span>'+esc(exportedAddr(o)||'—')+'</div>'
-    +'<div class="box"><span>'+(o.verified?'Verified correct address — Royal Mail':(o.priority===1?'Verified address — NOT YET VERIFIED':(o.priority>=2&&o.priority<=3?'Suggested cleaned address — NOT Royal Mail verified yet':'Cleaned address — to be confirmed on Royal Mail')))+'</span>'+esc(o.verified?o.verifiedAddress:o.cleaned)+'</div></div>'
-    +'<div class="box" style="margin-top:10px"><span>Address parts — all included in the cleaned address, in this order</span>Locality: <b>'+esc(o.addrLocality||'— none in file')+'</b> · Village (if any): <b>'+esc(o.addrVillage||'— none')+'</b> · Town: <b>'+esc(o.addrTown||'— missing')+'</b> · Post town: <b>'+esc(o.addrPostTown||'— not detected, confirm on Royal Mail')+'</b> · Postcode: <b>'+esc(o.postcode||'— missing')+'</b></div>'
+    +'<div class="orderhead"><div><span class="ordno">'+esc(o.order||'—')+'</span> · <span class="cust">'+esc(o.name||'Customer')+'</span><div class="addr">'+esc(o.site)+(o.email?' · '+esc(o.email):'')+'</div></div><div class="rowflex">'+prio+valBadge+badge+queue+mv+'</div></div>'
+    +'<div class="grid2"><div class="box"><span>Shipping address — as exported (paste this into Royal Mail search)</span>'+esc(exportedAddr(o)||'—')+'</div>'
+    +'<div class="box"><span>Final suggested address — from the Royal Mail preview</span>'+esc(o.verified?o.verifiedAddress:o.cleaned)+'</div></div>'
     +(o.issues.length?'<p class="issue" style="margin:10px 0 0">Issue: '+esc(o.issues.join(' · '))+'</p>':(o.verified?'<p style="margin:10px 0 0;color:var(--muted)">Verified — the Royal Mail preview address matches this order\'s postcode, street and town exactly.</p>':'<p style="margin:10px 0 0;color:var(--muted)">No issue found by the automatic checks — the postcode exists and a house number and street are present. It still needs its Royal Mail preview match before it counts as verified.</p>'))
     +'<p style="margin:4px 0 0;font-size:13px;color:var(--muted)">Order value: '+esc(fmtMoney(o.valueNum))+' · Source: '+esc(o.verified?'Royal Mail (team manual check)':o.source)+' · Action: '+esc(actionFor(o))+'</p>'
     +'<details><summary>Verify on Royal Mail / update the address</summary>'
-    +'<div class="rowflex" style="margin:10px 0"><button class="btn light" onclick="copyPC('+realIdx+')">Copy postcode: '+esc(o.postcode||'—')+'</button><a class="btn light" style="text-decoration:none;display:inline-block" href="https://www.royalmail.com/find-a-postcode" target="_blank" rel="noopener">Open Royal Mail ↗</a></div>'
-    +'<textarea class="verify" id="v-'+realIdx+'" placeholder="Paste the exact address shown on Royal Mail here — e.g. 7 Siddal Grove, Halifax, HX3 9AQ">'+esc(o.verified?o.verifiedAddress:'')+'</textarea>'
+    +'<div class="rowflex" style="margin:10px 0"><button class="btn red" onclick="copyAddr('+realIdx+')">Copy address for Royal Mail search</button><button class="btn light" onclick="copyPC('+realIdx+')">Copy postcode: '+esc(o.postcode||'—')+'</button><a class="btn light" style="text-decoration:none;display:inline-block" href="https://www.royalmail.com/find-a-postcode" target="_blank" rel="noopener">Open Royal Mail ↗</a></div>'
+    +'<textarea class="verify" id="v-'+realIdx+'" placeholder="Paste the accurate address shown in the Royal Mail preview here — e.g. Rose Cottage, Chapel Lane, Little Millford, Northfield, ZZ9 9ZZ. That line becomes the final suggested address.">'+esc(o.verified?o.verifiedAddress:'')+'</textarea>'
+    +'<p id="mv-'+realIdx+'" style="margin:8px 0 0;font-weight:700;color:var(--red)">'+(o.manualVerify&&!o.verified?'Manually verify this one — '+esc(o.manualVerifyReason||'the preview did not show an exact match for this order.'):'')+'</p>'
     +'<div class="rowflex" style="margin-top:8px"><button class="btn red" onclick="markVerified('+realIdx+')">✓ Mark Royal Mail Verified</button><button class="btn light" onclick="markHold('+realIdx+')">Mark as HOLD</button><button class="btn ghost" onclick="resetOrder('+realIdx+')">Reset</button></div>'
     +'</details></article>';
   }).join('');
@@ -503,13 +510,17 @@ function render(){
   }
 }
 function actionFor(o){
-  if(o.verified)return 'Dispatch using the verified address.';
+  if(o.verified)return 'Dispatch using the final suggested address — the Royal Mail preview address shown for this order.';
+  if(o.manualVerify)return 'Manually verify this one — the Royal Mail preview did not show an exact match for the exported address, so no address has been suggested.';
   if(o.status==='HOLD')return 'Do not dispatch — get the house or business name and number from the customer.';
   if(o.status==='FIX')return 'Correct it first, then confirm the corrected address on the Royal Mail preview.';
   if(o.status==='CONFIRM')return 'Resolve the mismatch, then confirm the shipping address on the Royal Mail preview before dispatch.';
   return 'Check this address on the Royal Mail preview — postcode, street and town must match exactly — then mark it verified.';
 }
 window.copyPC=function(i){var pc=orders[i].postcode||''; if(navigator.clipboard)navigator.clipboard.writeText(pc); };
+/* One simple line for the Royal Mail search box: the exported shipping
+   address exactly as it stands — house, street lines, town, postcode. */
+window.copyAddr=function(i){var a=exportedAddr(orders[i])||''; if(navigator.clipboard&&a)navigator.clipboard.writeText(a); };
 /* A pasted Royal Mail preview address only counts as verified when it
    matches the order on all three parts — postcode, street and town.
    Anything wrong or mismatched is rejected, never marked verified. */
@@ -523,7 +534,15 @@ function streetKey(line){
 }
 window.markVerified=function(i){
   var o=orders[i]; var t=$('v-'+i); var v=norm(t?t.value:'');
-  function reject(msg){ if(t){t.focus(); t.style.borderColor='var(--red)'; t.placeholder='⚠ NOT VERIFIED — '+msg;} }
+  function reject(msg){
+    /* No exact preview match: no address is suggested for this order —
+       it is simply flagged for the team to verify manually. The flag is
+       stored on the order, so it shows on the card, stays in the queue,
+       and is written into the downloaded sheet. */
+    o.manualVerify=true; o.manualVerifyReason=msg; markDlDirty(); refreshDownloadLinks();
+    var mvEl=$('mv-'+i); if(mvEl)mvEl.textContent='Manually verify this one — '+msg;
+    if(t){t.focus(); t.style.borderColor='var(--red)'; t.placeholder='⚠ NOT AN EXACT MATCH — manually verify this one. '+msg;}
+  }
   if(!v){ reject('paste the exact address shown in the Royal Mail preview here first, then press Mark Verified again.'); return; }
   var pastedLow=v.toLowerCase().replace(/\s+/g,' ');
   var pastedPC=cleanPC(extractPC(v)||'');
@@ -533,10 +552,10 @@ window.markVerified=function(i){
   var townCands=[o.addrTown,o.addrPostTown,o.shipCity,o.pcTown].map(function(x){return norm(x||'').toLowerCase()}).filter(Boolean);
   var townOk=townCands.some(function(tc){return pastedLow.indexOf(tc)>-1});
   if(townCands.length&&!townOk){ reject('town mismatch: the pasted address does not contain this order\'s town or post town (“'+(o.addrTown||o.addrPostTown||o.shipCity)+'”). Check the preview result again.'); return; }
-  o.verified=true; o.verifiedAddress=v; o.pending=false; o.displayStatus='OK'; assignQueue(); render();
+  o.verified=true; o.verifiedAddress=v; o.pending=false; o.manualVerify=false; o.manualVerifyReason=''; o.displayStatus='OK'; assignQueue(); render();
 };
-window.markHold=function(i){orders[i].status='HOLD';orders[i].priority=1;orders[i].verified=false;orders[i].verifiedAddress='';orders[i].cleaned='NOT ROYAL MAIL VERIFIED — no verified address yet. Do not dispatch and do not use the exported address as if it were verified. Get the missing details from the customer, verify the exact address on Royal Mail, then paste that Royal Mail address via “Mark Royal Mail Verified”.'; assignQueue(); render();};
-window.resetOrder=function(i){orders[i].verified=false;orders[i].verifiedAddress=''; analyse(orders[i]); assignQueue(); render();};
+window.markHold=function(i){orders[i].status='HOLD';orders[i].priority=1;orders[i].verified=false;orders[i].verifiedAddress='';orders[i].manualVerify=false;orders[i].manualVerifyReason='';orders[i].cleaned='NOT ROYAL MAIL VERIFIED — no final suggested address yet. Do not dispatch and do not use the exported address as if it were verified. Get the missing details from the customer, verify the exact address on Royal Mail, then paste that Royal Mail preview address via “Mark Royal Mail Verified” — the pasted preview line becomes the final suggested address.'; assignQueue(); render();};
+window.resetOrder=function(i){orders[i].verified=false;orders[i].verifiedAddress='';orders[i].manualVerify=false;orders[i].manualVerifyReason=''; analyse(orders[i]); assignQueue(); render();};
 
 /* ---------- File loading: one file at a time, in the order added ---------- */
 function readFileText(file){
@@ -725,9 +744,9 @@ function openCsvPanel(type){
   $('csvPanel').scrollIntoView({behavior:'smooth',block:'nearest'});
 }
 function exportRows(list){
-  var rows=[['Order','File / Brand','Customer','Order Value','Shipping Address As Exported','Locality','Village (if any)','Town','Post Town','County / State (as exported)','Status','Priority','Issue','Verified Address — Royal Mail Only','Suggested Cleaned Address — Not Royal Mail Verified','Verification Source','Preview Queue','Action']];
+  var rows=[['Order','File / Brand','Customer','Order Value','Shipping Address As Exported','Postcode','County / State (as exported)','Status','Priority','Issue','Final Suggested Address — From Royal Mail Preview','Manual Verify Note','Verification Source','Preview Queue','Action']];
   var sorted=list.slice().sort(function(a,b){return displayRank(a)-displayRank(b)});
-  sorted.forEach(function(o){rows.push([o.order,o.site,o.name,o.valueNum==null?'':o.valueNum.toFixed(2),exportedAddr(o),o.addrLocality||'',o.addrVillage||'',o.addrTown||'',o.addrPostTown||'',o.shipProvince||'',o.verified?'ROYAL MAIL VERIFIED':o.displayStatus,o.priority?('P'+o.priority):'',o.issues.join(' | '),o.verified?o.verifiedAddress:'',o.verified?'':o.cleaned,o.verified?'Royal Mail preview (team check — postcode, street and town matched)':o.source,o.inQueue?('#'+o.queueNo):'',actionFor(o)]);});
+  sorted.forEach(function(o){rows.push([o.order,o.site,o.name,o.valueNum==null?'':o.valueNum.toFixed(2),exportedAddr(o),o.postcode||'',o.shipProvince||'',o.verified?'ROYAL MAIL VERIFIED':o.displayStatus,o.priority?('P'+o.priority):'',o.issues.join(' | '),o.verified?o.verifiedAddress:'',o.verified?'':(o.manualVerify?('Manually verify this one — '+(o.manualVerifyReason||'the Royal Mail preview did not show an exact match')):'Awaiting Royal Mail preview — paste the exported address into Royal Mail search; the accurate preview match becomes the final suggested address. If the preview has no exact match, manually verify this one.'),o.verified?'Royal Mail preview (team check — postcode, street and town matched); preview address is the final suggested address':o.source,o.inQueue?('#'+o.queueNo):'',actionFor(o)]);});
   return toCSV(rows);
 }
 
@@ -740,7 +759,8 @@ var DEMO=[
  {order:'#DEMO-05',name:'Sample — Possible Spelling Issue',valueNum:31.20,ship1:'35 Yewtree Place',ship2:'',shipCity:'Evesham',shipZip:'WR11 1AB'},
  {order:'#DEMO-06',name:'Sample — Postcode Does Not Exist',valueNum:120.00,ship1:'10 Mill Lane',ship2:'',shipCity:'Dover',shipZip:'CT99 9ZZ'},
  {order:'#DEMO-07',name:'Sample — Missing Post Town (fictitious example)',valueNum:42.00,ship1:'Rose Cottage, Mill Lane',ship2:'',shipCity:'Millford',shipZip:'ZZ9 9ZZ'},
- {order:'#DEMO-08',name:'Sample — Locality, Village, Town and Post Town All Present (fictitious example)',valueNum:38.00,ship1:'4 Mill Cottages',ship2:'',shipLocality:'Lower Mill',shipVillage:'Millford',shipTown:'Northfield',shipPostTownCol:'Sampleton',shipCity:'Northfield',shipZip:'ZZ9 9ZZ'}
+ {order:'#DEMO-08',name:'Sample — Full Address, Every Line Present in the File (fictitious example)',valueNum:38.00,ship1:'4 Mill Cottages',ship2:'',shipLocality:'Lower Mill',shipVillage:'Millford',shipTown:'Northfield',shipPostTownCol:'Sampleton',shipCity:'Northfield',shipZip:'ZZ9 9ZZ'},
+ {order:'#DEMO-09',name:'Sample — Named House: Street and Village Only in the Royal Mail Preview (fictitious example)',valueNum:56.00,ship1:'Rose Cottage',ship2:'',shipCity:'Northfield',shipZip:'ZZ9 9ZZ'}
 ];
 
 /* ---------- Events ---------- */
@@ -762,16 +782,23 @@ $('demoBtn').addEventListener('click',function(e){
      and postcode — not a real address), so the missing-post-town rule can be shown in the
      demo without any live data: the file shows only the village, the post town is missing. */
   function applyDemo07(o){ o.pcValid=true; o.pcParish='Millford'; o.pcConstituency='Sampleton'; o.pcTtwa='Sampleton'; o.pcPostTown='Sampleton'; o.pcAlt='millford|sampleton'; analyse(o); if(o.issues.indexOf('Demo note: fictitious sample — village and post town are invented for training')===-1)o.issues.push('Demo note: fictitious sample — village and post town are invented for training'); }
-  /* DEMO-08 is likewise fully fictitious and simulated (invented locality, village,
-     town, post town and postcode), so the full address-parts structure can be shown:
-     its cleaned address must read 4 Mill Cottages, Lower Mill, Millford, Northfield,
-     Sampleton, ZZ9 9ZZ — locality, village, town and post town all present, in order. */
-  function applyDemo08(o){ o.pcValid=true; analyse(o); if(o.issues.indexOf('Demo note: fictitious sample — locality, village, town and post town are invented for training')===-1)o.issues.push('Demo note: fictitious sample — locality, village, town and post town are invented for training'); }
-  batch.forEach(function(o){ if(o.order==='#DEMO-07')applyDemo07(o); if(o.order==='#DEMO-08')applyDemo08(o); });
+  /* DEMO-08 is likewise fully fictitious and simulated (invented lines and
+     postcode): a complete address with every line already in the file, shown
+     as one simple address — 4 Mill Cottages, Lower Mill, Millford, Northfield,
+     Sampleton, ZZ9 9ZZ. */
+  function applyDemo08(o){ o.pcValid=true; analyse(o); if(o.issues.indexOf('Demo note: fictitious sample — the address lines are invented for training')===-1)o.issues.push('Demo note: fictitious sample — the address lines are invented for training'); }
+  /* DEMO-09 is fully fictitious and simulated (invented house, street,
+     village, town and postcode — not a real address): the file shows only
+     “Rose Cottage, Northfield, ZZ9 9ZZ”, and the street (Chapel Lane) and
+     village (Little Millford) exist only in the simulated Royal Mail
+     preview — so there is deliberately no final suggestion until that
+     preview line is pasted into the card and marked verified. */
+  function applyDemo09(o){ o.pcValid=true; analyse(o); var note='Fictitious training example: the Royal Mail preview for this address shows “Rose Cottage, Chapel Lane, Little Millford, Northfield, ZZ9 9ZZ” — paste that preview line into this card and press Mark Royal Mail Verified, and it becomes the final suggested address in the downloaded sheet'; if(o.issues.indexOf(note)===-1)o.issues.push(note); }
+  batch.forEach(function(o){ if(o.order==='#DEMO-07')applyDemo07(o); if(o.order==='#DEMO-08')applyDemo08(o); if(o.order==='#DEMO-09')applyDemo09(o); });
   fileNames.push({name:'Demo orders (samples — not real orders)',brand:brand,count:batch.length,skipped:0});
   renderLimit=PAGE_SIZE; assignQueue(); render();
   /* Then run the same live postcodes.io check as a real file; DEMO-07's simulated fields are restored afterwards because its postcode is invented */
-  checkPostcodes(batch).then(function(){ batch.forEach(function(o){ if(o.order==='#DEMO-06'){o.pcValid=false;} analyse(o); if(o.order==='#DEMO-06'&&o.issues.indexOf('Demo note: this postcode does not exist in real life')===-1)o.issues.push('Demo note: this postcode does not exist in real life'); if(o.order==='#DEMO-07')applyDemo07(o); if(o.order==='#DEMO-08')applyDemo08(o); }); assignQueue(); render(); });
+  checkPostcodes(batch).then(function(){ batch.forEach(function(o){ if(o.order==='#DEMO-06'){o.pcValid=false;} analyse(o); if(o.order==='#DEMO-06'&&o.issues.indexOf('Demo note: this postcode does not exist in real life')===-1)o.issues.push('Demo note: this postcode does not exist in real life'); if(o.order==='#DEMO-07')applyDemo07(o); if(o.order==='#DEMO-08')applyDemo08(o); if(o.order==='#DEMO-09')applyDemo09(o); }); assignQueue(); render(); });
 });
 ['searchBox','statusFilter','siteFilter','queueFilter'].forEach(function(id){$(id).addEventListener('input',function(){renderLimit=PAGE_SIZE;render();});$(id).addEventListener('change',function(){renderLimit=PAGE_SIZE;render();});});
 $('moreBtn').addEventListener('click',function(){renderLimit+=PAGE_SIZE;render();});
